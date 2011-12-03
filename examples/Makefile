@@ -121,7 +121,7 @@ $(COMMON_TARGETS):: % : $(addsuffix %,$(EXAMPLES_DIRS))
 
 # proxy rule for calling appropriate example
 $(EXAMPLES_TARGETS)::
-	-$(MAKE) -C $(@D)  -f $(EXAMPLE_MAKEFILE) $(notdir $@) CXX="$(CPLUS)" CXXFLAGS="$(CXXFLAGS) -I$(HOME)/local/include -DUSE_LITHE -L$(HOME)/local/lib" LIBS="$(LIBS) -llithe -lht"
+	-$(MAKE) -C $(@D)  -f $(EXAMPLE_MAKEFILE) $(notdir $@) CXX="$(CPLUS)" CXXFLAGS="$(CXXFLAGS) -I$(HOME)/local/include -DUSE_LITHE -L$(HOME)/local/lib" LIBS="$(LIBS) -llithe"
 
 printenv:
 ifeq ($(tbb_os),windows)
