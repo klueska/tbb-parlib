@@ -43,6 +43,7 @@ CPLUS = g++
 LIB_LINK_FLAGS = -shared -Wl,-soname=$(BUILDING_LIBRARY)
 LIBS = -lpthread -lrt
 C_FLAGS = $(CPLUS_FLAGS) -x c
+INCLUDES += $(INCLUDE_KEY)$(PARLIB_PREFIX)/include
 INCLUDES += $(INCLUDE_KEY)$(LITHE_PREFIX)/include
 
 ifeq ($(cfg), release)

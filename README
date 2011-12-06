@@ -1,5 +1,19 @@
-Threading Building Blocks - README
+Threading Building Blocks (lithe port) - README
+For questions or comments, please contact: Kevin Klues <klueska@cs.berkeley.edu>
 
+This is the lithe port of TBB.  If you have installed lithe and parlib in
+non-standard locations, you need to set the following variables before
+compiling this library. 
+
+PARLIB_PREFIX=<parlib_install_dir>
+LITHE_PREFIX=<lithe_install_dir>
+
+After doing this, you should be able to just run 'make' to compile tbb, and
+'make examples' to run all of the TBB tests.  Some of these tests fail, but
+that is normal -- they even fail when running them for TBB without lithe
+support.
+
+########## Below are the directions from the original TBB README ##############
 See index.html for directions and documentation.
 
 If source is present (./Makefile and src/ directories),
