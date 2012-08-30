@@ -24,6 +24,9 @@
 # invalidate any other reasons why the executable file might be covered by
 # the GNU General Public License.
 
+#THREADING_LIBRARY=PTHREAD
+THREADING_LIBRARY=LITHE
+
 COMPILE_ONLY = -c -MMD
 PREPROC_ONLY = -E -x c++
 INCLUDE_KEY = -I
@@ -46,6 +49,9 @@ CPLUS = g++
 CONLY = gcc
 LIB_LINK_FLAGS = $(DYLIB_KEY) -Wl,-soname=$(BUILDING_LIBRARY)
 LIBS += -lpthread -lrt
+ifeq ($(THREADING_LIBRARY),LITHE)
+  LIBS += -lithe -lparlib
+endif
 LINK_FLAGS = -Wl,-rpath-link=.
 C_FLAGS = $(CPLUS_FLAGS)
 # gcc 4.4 and higher support -std=c++0x
@@ -60,10 +66,10 @@ endif
 
 ITT_NOTIFY = -DDO_ITT_NOTIFY
 ifeq ($(cfg), release)
-        CPLUS_FLAGS = $(ITT_NOTIFY) -g -O2 -DUSE_PTHREAD
+        CPLUS_FLAGS = $(ITT_NOTIFY) -g -O2 -DUSE_$(THREADING_LIBRARY)
 endif
 ifeq ($(cfg), debug)
-        CPLUS_FLAGS = -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_PTHREAD
+        CPLUS_FLAGS = -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_$(THREADING_LIBRARY)
 endif
 
 ifneq (00,$(lambdas)$(cpp0x))
