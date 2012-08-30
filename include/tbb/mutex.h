@@ -31,6 +31,8 @@
 
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
+#elif USE_LITHE
+#include <parlib/spinlock.h>
 #else
 #include <pthread.h>
 #endif /* _WIN32||_WIN64 */
@@ -54,6 +56,8 @@ public:
 #else
   #if _WIN32||_WIN64
         InitializeCriticalSection(&impl);
+  #elif USE_LITHE
+		spinlock_init(&impl);
   #else
         int error_code = pthread_mutex_init(&impl,NULL);
         if( error_code )
@@ -68,6 +72,8 @@ public:
 #else
   #if _WIN32||_WIN64
         DeleteCriticalSection(&impl);
+  #elif USE_LITHE
+		// Do nothing
   #else
         pthread_mutex_destroy(&impl); 
 
@@ -160,6 +166,8 @@ public:
 #else
   #if _WIN32||_WIN64
         EnterCriticalSection(&impl);
+  #elif USE_LITHE
+		spinlock_lock(&impl);
   #else
         pthread_mutex_lock(&impl);
   #endif /* _WIN32||_WIN64 */
@@ -177,6 +185,8 @@ public:
 #else
   #if _WIN32||_WIN64
         return TryEnterCriticalSection(&impl)!=0;
+  #elif USE_LITHE
+		return spinlock_trylock(&impl)==0;
   #else
         return pthread_mutex_trylock(&impl)==0;
   #endif /* _WIN32||_WIN64 */
@@ -193,6 +203,8 @@ public:
 #else
   #if _WIN32||_WIN64
         LeaveCriticalSection(&impl);
+  #elif USE_LITHE
+		spinlock_unlock(&impl);
   #else
         pthread_mutex_unlock(&impl);
   #endif /* _WIN32||_WIN64 */
@@ -202,6 +214,8 @@ public:
     //! Return native_handle
   #if _WIN32||_WIN64
     typedef LPCRITICAL_SECTION native_handle_type;
+  #elif USE_LITHE
+	typedef spinlock_t *native_handle_type;
   #else
     typedef pthread_mutex_t* native_handle_type;
   #endif
@@ -216,6 +230,8 @@ private:
 #if _WIN32||_WIN64
     CRITICAL_SECTION impl;    
     enum state_t state;
+#elif USE_LITHE
+	spinlock_t impl;
 #else
     pthread_mutex_t impl;
 #endif /* _WIN32||_WIN64 */

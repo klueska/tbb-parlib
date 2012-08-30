@@ -24,8 +24,9 @@
 # invalidate any other reasons why the executable file might be covered by
 # the GNU General Public License.
 
+THREADING_LIBRARY=PTHREAD -DUSE_LITHE
 #THREADING_LIBRARY=PTHREAD
-THREADING_LIBRARY=LITHE
+#THREADING_LIBRARY=LITHE
 
 COMPILE_ONLY = -c -MMD
 PREPROC_ONLY = -E -x c++
@@ -48,10 +49,16 @@ TBB_NOSTRICT = 1
 CPLUS = g++
 CONLY = gcc
 LIB_LINK_FLAGS = $(DYLIB_KEY) -Wl,-soname=$(BUILDING_LIBRARY)
-LIBS += -lpthread -lrt
-ifeq ($(THREADING_LIBRARY),LITHE)
-  LIBS += -lithe -lparlib
+ifeq ($(THREADING_LIBRARY),PTHREAD)
+  LIBS += -lpthread
 endif
+ifeq ($(THREADING_LIBRARY),LITHE)
+  LIBS += -lithe -lparlib -ldl
+endif
+ifeq ($(THREADING_LIBRARY),PTHREAD -DUSE_LITHE)
+  LIBS += -lpthread -lithe -lparlib -ldl
+endif
+LIBS += -lrt
 LINK_FLAGS = -Wl,-rpath-link=.
 C_FLAGS = $(CPLUS_FLAGS)
 # gcc 4.4 and higher support -std=c++0x

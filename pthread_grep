@@ -1,0 +1,1 @@
+grep -R "pthread\|PTHREAD" * | grep -v "doc/html/" | grep -v build | grep -v "examples/common/gui/" | grep -v "vcproj" | grep -v "examples/parallel_for/tachyon" | cut -d':' -f1 | sed '$!N; /^\(.*\)\n\1$/!P; D'

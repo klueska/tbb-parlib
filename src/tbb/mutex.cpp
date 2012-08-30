@@ -51,6 +51,8 @@ namespace tbb {
             __TBB_ASSERT(false,"mutex::scoped_lock: illegal mutex state");
             break;
         }
+#elif USE_LITHE
+        spinlock_lock(&m.impl);
 #else
         int error_code = pthread_mutex_lock(&m.impl);
         __TBB_ASSERT_EX(!error_code,"mutex::scoped_lock: pthread_mutex_lock failed");
@@ -76,6 +78,8 @@ void mutex::scoped_lock::internal_release() {
             __TBB_ASSERT(false,"mutex::scoped_lock: illegal mutex state");
             break;
     }
+#elif USE_LITHE
+     spinlock_unlock(&my_mutex->impl);
 #else
      int error_code = pthread_mutex_unlock(&my_mutex->impl);
      __TBB_ASSERT_EX(!error_code, "mutex::scoped_lock: pthread_mutex_unlock failed");
@@ -105,6 +109,8 @@ bool mutex::scoped_lock::internal_try_acquire( mutex& m ) {
         __TBB_ASSERT(m.state!=HELD, "mutex::scoped_lock: deadlock caused by attempt to reacquire held mutex");
         m.state = HELD;
     }
+#elif USE_LITHE
+    result = spinlock_trylock(&m.impl)==0;
 #else
     result = pthread_mutex_trylock(&m.impl)==0;
 #endif /* _WIN32||_WIN64 */
@@ -117,6 +123,8 @@ void mutex::internal_construct() {
 #if _WIN32||_WIN64
     InitializeCriticalSection(&impl);
     state = INITIALIZED;  
+#elif USE_LITHE
+    spinlock_init(&impl);
 #else
     int error_code = pthread_mutex_init(&impl,NULL);
     if( error_code )
@@ -139,6 +147,8 @@ void mutex::internal_destroy() {
         break;
     }
     state = DESTROYED;
+#elif USE_LITHE
+    // Do nothing!
 #else
     int error_code = pthread_mutex_destroy(&impl); 
     __TBB_ASSERT_EX(!error_code,"mutex: pthread_mutex_destroy failed");
