@@ -191,7 +191,7 @@ TLSKey::TLSKey()
 #if USE_WINTHREAD
     TLS_pointer_key = TlsAlloc();
 #elif USE_LITHE
-    TLS_pointer_key = lithe_clskey_create(NULL);//(lithe_cls_dtor_t)mallocThreadShutdownNotification);
+    TLS_pointer_key = lithe_clskey_create((lithe_cls_dtor_t)mallocThreadShutdownNotification);
 #else
     int status = pthread_key_create( &TLS_pointer_key, mallocThreadShutdownNotification );
     if ( status ) {

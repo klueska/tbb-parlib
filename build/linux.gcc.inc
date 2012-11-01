@@ -24,7 +24,6 @@
 # invalidate any other reasons why the executable file might be covered by
 # the GNU General Public License.
 
-#THREADING_LIBRARY=PTHREAD -DUSE_LITHE
 #THREADING_LIBRARY=PTHREAD
 THREADING_LIBRARY=LITHE
 
