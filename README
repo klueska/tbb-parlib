@@ -1,3 +1,27 @@
+Threading Building Blocks (lithe port) - README
+For questions or comments, please contact: 
+Kevin Klues <klueska@cs.berkeley.edu>
+
+This is the lithe port of TBB. It is based on the following tbb release:
+
+June 28, 2012: Intel® Threading Building Blocks 4.0 Update 5
+tbb40_20120613oss stable release
+http://threadingbuildingblocks.org/ver.php?fid=187
+
+If you have installed lithe and parlib in non-standard locations, you need to
+set the following variables before compiling this library. 
+
+PARLIB_PREFIX=<parlib_install_dir>
+LITHE_PREFIX=<lithe_install_dir>
+
+After doing this, you should be able to just run 'make' to compile tbb, and
+'make examples' to run all of the TBB examples.  Currently some of these
+examples fail -- we are working hard to get this fixed.
+
+You can also run 'make test' to run the regression tests, but again, some of
+these fail currently, and we are in the process of resolving this.
+
+########## Below are the directions from the original TBB README ##############
 Threading Building Blocks - README
 
 See index.html for directions and documentation.
