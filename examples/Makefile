@@ -33,8 +33,6 @@
 #      calls specified example with specified target.
 #      For instance: make task/tree_sum/all
 
-USE_LITHE=yes
-
 tbb_root?=..
 BUILDING_PHASE:=0
 include ../build/common.inc
@@ -143,16 +141,10 @@ EXAMPLES_TARGETS := $(foreach T,$(COMMON_TARGETS),$(addsuffix $(T),$(EXAMPLES_DI
 # execute standard targets for all examples
 $(COMMON_TARGETS):: % : $(addsuffix %,$(EXAMPLES_DIRS))
 
-ifdef USE_LITHE
 # proxy rule for calling appropriate example
 $(EXAMPLES_TARGETS)::
 	@echo --------------------------------------------------
-	-$(MAKE) SHELL=$(SHELL) -C $(@D)  -f $(EXAMPLE_MAKEFILE) $(notdir $@) CXX="$(CPLUS)" CXXFLAGS="$(CXXFLAGS)" LIBS="-lparlib -lithe -lrt"
-else
-$(EXAMPLES_TARGETS)::
-	@echo --------------------------------------------------
 	-$(MAKE) SHELL=$(SHELL) -C $(@D)  -f $(EXAMPLE_MAKEFILE) $(notdir $@) CXX="$(CPLUS)" CXXFLAGS="$(CXXFLAGS)"
-endif
 
 printenv:
 ifeq ($(tbb_os),windows)

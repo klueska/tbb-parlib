@@ -52,10 +52,7 @@ ifeq ($(THREADING_LIBRARY),PTHREAD)
   LIBS += -lpthread
 endif
 ifeq ($(THREADING_LIBRARY),LITHE)
-  LIBS += -lithe -lparlib -ldl
-endif
-ifeq ($(THREADING_LIBRARY),PTHREAD -DUSE_LITHE)
-  LIBS += -lpthread -lithe -lparlib -ldl
+  LIBS += -lithe -lparlib
 endif
 LIBS += -lrt
 LINK_FLAGS = -Wl,-rpath-link=.
