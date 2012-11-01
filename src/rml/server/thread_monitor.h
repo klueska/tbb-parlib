@@ -36,6 +36,10 @@
 #include <process.h>
 #include <malloc.h> //_alloca
 #include "tbb/tbb_misc.h" // NumberOfProcessorGroups, MoveThreadIntoProcessorGroup, FindProcessorGroupIndex
+#elif USE_LITHE
+#include "tbb/tbb_lithe.h"
+#include <string.h>
+#include <stdlib.h>
 #elif USE_PTHREAD
 #include <pthread.h>
 #include <string.h>
@@ -112,6 +116,12 @@ public:
     //! Launch a thread
     static void launch( thread_routine_type thread_routine, void* arg, size_t stack_size, const size_t* worker_index = NULL );
 
+#elif USE_LITHE
+    #define __RML_DECL_THREAD_ROUTINE void
+    typedef void (*thread_routine_type)(void*);
+
+    //! Launch a thread
+    static void launch( thread_routine_type thread_routine, void* arg, size_t stack_size );
 #elif USE_PTHREAD
     #define __RML_DECL_THREAD_ROUTINE void*
     typedef void*(*thread_routine_type)(void*);
@@ -159,6 +169,18 @@ inline void thread_monitor::yield() {
     SwitchToThread();
 }
 #endif /* USE_WINTHREAD */
+
+#if USE_LITHE
+inline void thread_monitor::launch( void (*thread_routine)(void*), void* arg, size_t stack_size ) {
+    tbb::lithe::context_t *context  = NULL;
+    tbb::lithe::scheduler *sched = (tbb::lithe::scheduler*)lithe_sched_current();
+    sched->context_create(&context, stack_size, thread_routine, arg);
+}
+
+inline void thread_monitor::yield() {
+    lithe_context_yield();
+}
+#endif
 
 #if USE_PTHREAD
 inline void thread_monitor::check( int error_code, const char* routine ) {

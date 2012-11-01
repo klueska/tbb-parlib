@@ -219,9 +219,8 @@ struct WorkForCondVarCtor: NoAssign {
                 throw_exception( tbb::internal::eid_condvar_wait_failed );
             }
 #elif USE_LITHE
-            // Need lithe specific implementation of condition variables
-            handle = NULL;
-            throw_exception( tbb::internal::eid_condvar_wait_failed );
+            if( lithe_condvar_wait( handle, my_mtx.native_handle() ) )
+                throw_exception( tbb::internal::eid_condvar_wait_failed );
 #else
             if( pthread_cond_wait( handle, my_mtx.native_handle() ) )
                 throw_exception( tbb::internal::eid_condvar_wait_failed );
@@ -239,8 +238,7 @@ struct WorkForCondVarCtor: NoAssign {
 #if _WIN32||_WIN64
                 tbb::interface5::internal::internal_condition_variable_notify_one( *handle );
 #elif USE_LITHE
-                // Need lithe specific implementation of condition variables
-                assert(0);
+                lithe_condvar_signal( handle );
 #else
                 pthread_cond_signal( handle );
 #endif

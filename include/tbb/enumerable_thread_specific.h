@@ -38,6 +38,8 @@
 
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
+#elif USE_LITHE
+#include <lithe/lithe.h>
 #else
 #include <pthread.h>
 #endif
@@ -57,6 +59,8 @@ namespace interface6 {
         protected:
 #if _WIN32||_WIN64
             typedef DWORD key_type;
+#elif USE_LITHE
+            typedef lithe_context_t* key_type;
 #else
             typedef pthread_t key_type;
 #endif
@@ -237,6 +241,12 @@ namespace interface6 {
             void destroy_key() { TlsFree(my_key); }
             void set_tls(void * value) { TlsSetValue(my_key, (LPVOID)value); }
             void* get_tls() { return (void *)TlsGetValue(my_key); }
+#elif USE_LITHE
+            typedef lithe_clskey_t *tls_key_t;
+            void create_key() { my_key = lithe_clskey_create(NULL); }
+            void destroy_key() { lithe_clskey_delete(my_key); }
+            void set_tls( void * value ) const { lithe_context_set_cls(my_key, value); }
+            void* get_tls() const { return lithe_context_get_cls(my_key); }
 #else
             typedef pthread_key_t tls_key_t;
             void create_key() { pthread_key_create(&my_key, NULL); }

@@ -43,13 +43,20 @@
     #include <dlfcn.h>    /* for dlsym */
     extern "C" { static void mallocThreadShutdownNotification(void*); }
 
+#elif USE_LITHE
+    #define TlsSetValue_func lithe_context_set_cls
+    #define TlsGetValue_func lithe_context_get_cls
+    inline void do_yield() {lithe_context_yield();}
+    #include <dlfcn.h>    /* for dlsym */
+    extern "C" { static void mallocThreadShutdownNotification(void*); }
+
 #elif USE_WINTHREAD
     #define TlsSetValue_func TlsSetValue
     #define TlsGetValue_func TlsGetValue
     inline void do_yield() {SwitchToThread();}
 
 #else
-    #error Must define USE_PTHREAD or USE_WINTHREAD
+    #error Must define USE_PTHREAD or USE_LITHE or USE_WINTHREAD
 
 #endif
 
@@ -120,6 +127,8 @@ public:
     static void init() {
 #if USE_WINTHREAD
         Tid_key = TlsAlloc();
+#elif USE_LITHE
+        Tid_key = lithe_clskey_create(NULL);
 #else
         int status = pthread_key_create( &Tid_key, NULL );
         if ( status ) {
@@ -132,6 +141,8 @@ public:
         if( Tid_key ) {
 #if USE_WINTHREAD
             TlsFree( Tid_key );
+#elif USE_LITHE
+            lithe_clskey_delete(Tid_key);
 #else
             int status = pthread_key_delete( Tid_key );
             if ( status ) {
@@ -179,6 +190,8 @@ TLSKey::TLSKey()
 {
 #if USE_WINTHREAD
     TLS_pointer_key = TlsAlloc();
+#elif USE_LITHE
+    TLS_pointer_key = lithe_clskey_create(NULL);//(lithe_cls_dtor_t)mallocThreadShutdownNotification);
 #else
     int status = pthread_key_create( &TLS_pointer_key, mallocThreadShutdownNotification );
     if ( status ) {
@@ -192,6 +205,8 @@ TLSKey::~TLSKey()
 {
 #if USE_WINTHREAD
     TlsFree(TLS_pointer_key);
+#elif USE_LITHE
+    lithe_clskey_delete(TLS_pointer_key);
 #else
     int status1 = pthread_key_delete(TLS_pointer_key);
     if ( status1 ) {
@@ -490,13 +505,13 @@ public:
 };
 
 class TLSData {
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
     MemoryPool   *memPool;
 #endif
 public:
     Bin           bin[numBlockBinLimit];
     FreeBlockPool freeBlocks;
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
     TLSData(MemoryPool *mPool, Backend *bknd) : memPool(mPool), freeBlocks(bknd) {}
     MemoryPool *getMemPool() const { return memPool; }
 #else
@@ -548,7 +563,11 @@ bool ExtMemoryPool::release16KBCaches()
 
 #if MALLOC_CHECK_RECURSION
 MallocMutex RecursiveMallocCallProtector::rmc_mutex;
+#if USE_LITHE
+tbb::lithe::context_t *RecursiveMallocCallProtector::owner_thread;
+#else
 pthread_t   RecursiveMallocCallProtector::owner_thread;
+#endif
 void       *RecursiveMallocCallProtector::autoObjPtr;
 bool        RecursiveMallocCallProtector::mallocRecursionDetected;
 #if __FreeBSD__
@@ -1830,7 +1849,7 @@ void Bin::processLessUsedBlock(MemoryPool *memPool, Block *block)
     }
 }
 
-#if USE_PTHREAD && (__TBB_SOURCE_DIRECTLY_INCLUDED || __TBB_USE_DLOPEN_REENTRANCY_WORKAROUND)
+#if (USE_PTHREAD || USE_LITHE) && (__TBB_SOURCE_DIRECTLY_INCLUDED || __TBB_USE_DLOPEN_REENTRANCY_WORKAROUND)
 
 /* Decrease race interval between dynamic library unloading and pthread key
    destructor. Protect only Pthreads with supported unloading. */
@@ -1870,7 +1889,7 @@ public:
     void processExit() { }
 };
 
-#endif // USE_PTHREAD && (__TBB_SOURCE_DIRECTLY_INCLUDED || __TBB_USE_DLOPEN_REENTRANCY_WORKAROUND)
+#endif // (USE_PTHREAD || USE_LITHE) && (__TBB_SOURCE_DIRECTLY_INCLUDED || __TBB_USE_DLOPEN_REENTRANCY_WORKAROUND)
 
 static ShutdownSync shutdownSync;
 

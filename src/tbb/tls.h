@@ -31,6 +31,8 @@
 
 #if USE_PTHREAD
 #include <pthread.h>
+#elif USE_LITHE
+#include <lithe/lithe.h>
 #else /* assume USE_WINTHREAD */
 #include "tbb/machine/windows_api.h"
 #endif
@@ -39,7 +41,11 @@ namespace tbb {
 
 namespace internal {
 
+#if USE_LITHE
+typedef lithe_cls_dtor_t tls_dtor_t;
+#else
 typedef void (*tls_dtor_t)(void*);
+#endif
 
 //! Basic cross-platform wrapper class for TLS operations.
 template <typename T>
@@ -50,9 +56,22 @@ public:
     int  create( tls_dtor_t dtor = NULL ) {
         return pthread_key_create(&my_key, dtor);
     }
-    int  destroy()      { return pthread_key_delete(my_key); }
-    void set( T value ) { pthread_setspecific(my_key, (void*)value); }
+    int  destroy()      { return pthread_key_delete(&my_key); }
+    void set( T value ) { pthread_setspecific(&my_key, (void*)value); }
     T    get()          { return (T)pthread_getspecific(my_key); }
+#elif USE_LITHE
+    typedef lithe_clskey_t *tls_key_t;
+public:
+    int  create(lithe_cls_dtor_t dtor = NULL) {
+        my_key = lithe_clskey_create(dtor);
+        return 0;
+    }
+    int  destroy() {
+        lithe_clskey_delete(my_key);
+        return 0;
+    }
+    void set( T value ) { lithe_context_set_cls(my_key, (void*)value); }
+    T    get()          { return (T)lithe_context_get_cls(my_key); }
 #else /* USE_WINTHREAD */
     typedef DWORD tls_key_t;
 public:

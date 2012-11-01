@@ -107,6 +107,8 @@ int TestMain ();
     #define HARNESS_NO_PARSE_COMMAND_LINE 1
 #endif
     #include <process.h>
+#elif USE_LITHE
+    #include "tbb/tbb_lithe.h"
 #else
     #include <pthread.h>
 #endif
@@ -355,6 +357,10 @@ public:
 #else
         const size_t stack_size = 4*MByte;
 #endif
+#if USE_LITHE
+        lithe_sched_enter(&sched);
+        sched.context_create(&thread_id, stack_size, thread_function, this);
+#else
         pthread_attr_t attr_stack;
         int status = pthread_attr_init(&attr_stack);
         ASSERT(0==status, "NativeParallelFor: pthread_attr_init failed");
@@ -363,6 +369,7 @@ public:
         status = pthread_create(&thread_id, &attr_stack, thread_function, this);
         ASSERT(0==status, "NativeParallelFor: pthread_create failed");
         pthread_attr_destroy(&attr_stack);
+#endif
 #if __ICC==1100
     #pragma warning (pop)
 #endif
@@ -375,7 +382,10 @@ public:
         DWORD status = WaitForSingleObject( thread_handle, INFINITE );
         ASSERT( status!=WAIT_FAILED, "WaitForSingleObject failed" );
         CloseHandle( thread_handle );
-#else
+#elif USE_LITHE
+        sched.joinAll();
+        lithe_sched_exit();
+#elif USE_PTHREAD
         int status = pthread_join( thread_id, NULL );
         ASSERT( !status, "pthread_join failed" );
 #endif
@@ -387,6 +397,9 @@ public:
 private:
 #if _WIN32||_WIN64
     HANDLE thread_handle;
+#elif USE_LITHE
+    tbb::lithe::context_t *thread_id;
+    tbb::lithe::scheduler sched;
 #else
     pthread_t thread_id;
 #endif
@@ -399,13 +412,17 @@ private:
 
 #if _WIN32||_WIN64
     static unsigned __stdcall thread_function( void* object )
+#elif USE_LITHE
+    static void thread_function(void* object)
 #else
     static void* thread_function(void* object)
 #endif
     {
         NativeParallelForTask& self = *static_cast<NativeParallelForTask*>(object);
         (self.body)(self.index);
+#if !USE_LITHE
         return 0;
+#endif
     }
 };
 
@@ -529,7 +546,15 @@ public:
     typedef DWORD tid_t;
     tid_t CurrentTid () { return GetCurrentThreadId(); }
 
-#else /* !WIN */
+#elif USE_LITHE
+    void Sleep ( int ms ) {
+        ASSERT(ms-ms, "Sleep not implemented for lithe!");
+    }
+
+    typedef tbb::lithe::context_t *tid_t;
+    tid_t CurrentTid () { return (tbb::lithe::context_t*)lithe_context_self(); }
+
+#else /* !WIN && !USE_LITHE */
 
     void Sleep ( int ms ) {
         timespec  requested = { ms / 1000, (ms % 1000)*1000000 };

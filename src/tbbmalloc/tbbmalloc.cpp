@@ -35,7 +35,7 @@
 
 #undef UNICODE
 
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
 #include <dlfcn.h>
 #elif USE_WINTHREAD
 #include "tbb/machine/windows_api.h"
@@ -140,7 +140,7 @@ void init_tbbmalloc() {
     HMODULE lib = LoadLibrary(MALLOCLIB_NAME);
     MALLOC_ASSERT(lib, "Allocator can't load ifself.");
     SetErrorMode (prev_mode);
-#endif /* USE_PTHREAD && !__TBB_SOURCE_DIRECTLY_INCLUDED */
+#endif /* USE_WINTHREAD && !__TBB_SOURCE_DIRECTLY_INCLUDED */
 }
 
 #if !__TBB_SOURCE_DIRECTLY_INCLUDED

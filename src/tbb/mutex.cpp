@@ -52,7 +52,8 @@ namespace tbb {
             break;
         }
 #elif USE_LITHE
-        spinlock_lock(&m.impl);
+        int error_code = lithe_mutex_lock(&m.impl);
+        __TBB_ASSERT_EX(!error_code,"mutex::scoped_lock: lithe_mutex_lock failed");
 #else
         int error_code = pthread_mutex_lock(&m.impl);
         __TBB_ASSERT_EX(!error_code,"mutex::scoped_lock: pthread_mutex_lock failed");
@@ -79,7 +80,8 @@ void mutex::scoped_lock::internal_release() {
             break;
     }
 #elif USE_LITHE
-     spinlock_unlock(&my_mutex->impl);
+     int error_code = lithe_mutex_unlock(&my_mutex->impl);
+     __TBB_ASSERT_EX(!error_code, "mutex::scoped_lock: lithe_mutex_unlock failed");
 #else
      int error_code = pthread_mutex_unlock(&my_mutex->impl);
      __TBB_ASSERT_EX(!error_code, "mutex::scoped_lock: pthread_mutex_unlock failed");
@@ -110,7 +112,7 @@ bool mutex::scoped_lock::internal_try_acquire( mutex& m ) {
         m.state = HELD;
     }
 #elif USE_LITHE
-    result = spinlock_trylock(&m.impl)==0;
+    result = lithe_mutex_trylock(&m.impl)==0;
 #else
     result = pthread_mutex_trylock(&m.impl)==0;
 #endif /* _WIN32||_WIN64 */
@@ -124,7 +126,9 @@ void mutex::internal_construct() {
     InitializeCriticalSection(&impl);
     state = INITIALIZED;  
 #elif USE_LITHE
-    spinlock_init(&impl);
+    int error_code = lithe_mutex_init(&impl,NULL);
+    if( error_code )
+        tbb::internal::handle_perror(error_code,"mutex: lithe_mutex_init failed");
 #else
     int error_code = pthread_mutex_init(&impl,NULL);
     if( error_code )

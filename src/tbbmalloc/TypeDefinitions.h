@@ -51,7 +51,9 @@
 #   else
 #       define __ARCH_other 1
 #   endif
-#   define USE_PTHREAD 1
+#   ifndef USE_LITHE
+#       define USE_PTHREAD 1
+#   endif
 #endif
 
 // According to C99 standard INTPTR_MIN defined for C++

@@ -1,1 +1,55 @@
-grep -R "pthread\|PTHREAD" * | grep -v "doc/html/" | grep -v build | grep -v "examples/common/gui/" | grep -v "vcproj" | grep -v "examples/parallel_for/tachyon" | cut -d':' -f1 | sed '$!N; /^\(.*\)\n\1$/!P; D'
+grep -Ri "pthread" * \
+| grep -v CHANGES \
+| grep -v tags \
+| grep -v Binary \
+| grep -v pthread_grep \
+| grep -v build \
+| grep -v "doc/html/" \
+| grep -v "examples/common/gui/" \
+| grep -v "examples/parallel_for/tachyon" \
+| grep -v src/test/test_malloc_compliance.cpp \
+| grep -v src/perf/statistics.cpp \
+| grep -v src/perf/statistics_xml.h \
+| grep -v "vcproj" \
+| cut -d':' -f1 | sed '$!N; /^\(.*\)\n\1$/!P; D' \
+\
+| grep -v include/tbb/mutex.h \
+| grep -v include/tbb/recursive_mutex.h \
+| grep -v include/tbb/tbb_thread.h \
+| grep -v include/tbb/critical_section.h \
+| grep -v include/tbb/compat/condition_variable \
+| grep -v include/tbb/enumerable_thread_specific.h \
+| grep -v src/test/test_condition_variable.h \
+| grep -v src/test/test_model_plugin.cpp \
+| grep -v src/test/test_malloc_init_shutdown.cpp \
+| grep -v src/test/harness_tbb_independence.h \
+| grep -v src/test/test_mutex.cpp \
+| grep -v src/test/harness.h \
+| grep -v src/tbbmalloc/tbbmalloc.cpp \
+| grep -v src/tbbmalloc/tbbmalloc_internal.h \
+| grep -v src/tbbmalloc/TypeDefinitions.h \
+| grep -v src/tbbmalloc/frontend.cpp \
+| grep -v src/tbbmalloc/Statistics.h \
+| grep -v src/tbb/mutex.cpp \
+| grep -v src/tbb/tls.h \
+| grep -v src/tbb/scheduler.cpp \
+| grep -v src/tbb/governor.h \
+| grep -v src/tbb/private_server.cpp \
+| grep -v src/tbb/governor.cpp \
+| grep -v src/tbb/pipeline.cpp \
+| grep -v src/tbb/tools_api/ittnotify_config.h \
+| grep -v src/tbb/tools_api/ittnotify.h \
+| grep -v src/tbb/tools_api/internal/ittnotify.h \
+| grep -v src/tbb/recursive_mutex.cpp \
+| grep -v src/rml/server/rml_server.cpp \
+# | grep -v src/tbb/tbb_thread.cpp \
+# | grep -v src/rml/server/thread_monitor.h \
+
+# NOTES:
+# include/tbb/compat/condition_variable
+#   condition_variable::wait_for not yet implemented
+# src/test/test_malloc_init_shutdown.cpp
+#   don't actually perform any test in here -- we punt
+# src/test/harness.h
+#   Don't actually perform the test yet -- we punt
+

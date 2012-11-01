@@ -194,11 +194,19 @@ typedef CRITICAL_SECTION  mutex_t;
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1 /* need for PTHREAD_MUTEX_RECURSIVE */
 #endif /* _GNU_SOURCE */
+#if USE_LITHE
+#include "tbb/tbb_lithe.h"
+typedef void*           lib_t;
+typedef tbb::lithe::context_t *TIDT;
+typedef lithe_mutex_t   mutex_t;
+#define MUTEX_INITIALIZER LITHE_MUTEX_INITIALIZER
+#else
 #include <pthread.h>
 typedef void*             lib_t;
 typedef pthread_t         TIDT;
 typedef pthread_mutex_t   mutex_t;
 #define MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#endif
 #define _strong_alias(name, aliasname) extern __typeof (name) aliasname __attribute__ ((alias (#name)));
 #define strong_alias(name, aliasname) _strong_alias(name, aliasname)
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
@@ -225,6 +233,23 @@ INLINE int __itt_interlocked_increment(volatile long* ptr)
 #endif /* ITT_SIMPLE_INIT */
 #else /* ITT_PLATFORM!=ITT_PLATFORM_WIN */
 #define __itt_get_proc(lib, name) dlsym(lib, name)
+#if USE_LITHE
+#define __itt_mutex_init(mutex)   \
+    {                                                                                        \
+        lithe_mutexattr_t mutex_attr;                                                      \
+        int error_code = lithe_mutexattr_init(&mutex_attr);                                \
+        if (error_code)                                                                      \
+            __itt_report_error(__itt_error_system, "lithe_mutexattr_init", error_code);    \
+        error_code = lithe_mutexattr_settype(&mutex_attr, LITHE_MUTEX_RECURSIVE);        \
+        if (error_code)                                                                      \
+            __itt_report_error(__itt_error_system, "lithe_mutexattr_settype", error_code); \
+        error_code = lithe_mutex_init(mutex, &mutex_attr);                                 \
+        if (error_code)                                                                      \
+            __itt_report_error(__itt_error_system, "lithe_mutex_init", error_code);        \
+    }
+#define __itt_mutex_lock(mutex)   lithe_mutex_lock(mutex)
+#define __itt_mutex_unlock(mutex) lithe_mutex_unlock(mutex)
+#else 
 #define __itt_mutex_init(mutex)   \
     {                                                                                        \
         pthread_mutexattr_t mutex_attr;                                                      \
@@ -243,6 +268,7 @@ INLINE int __itt_interlocked_increment(volatile long* ptr)
     }
 #define __itt_mutex_lock(mutex)   pthread_mutex_lock(mutex)
 #define __itt_mutex_unlock(mutex) pthread_mutex_unlock(mutex)
+#endif
 #define __itt_load_lib(name)      dlopen(name, RTLD_LAZY)
 #define __itt_unload_lib(handle)  dlclose(handle)
 #define __itt_system_error()      errno
@@ -250,8 +276,13 @@ INLINE int __itt_interlocked_increment(volatile long* ptr)
 #define __itt_fstrlen(s)          strlen(s)
 #define __itt_fstrcpyn(s1, s2, l) strncpy(s1, s2, l)
 #define __itt_fstrdup(s)          strdup(s)
+#if USE_LITHE
+#define __itt_thread_id()         ((tbb::lithe::context_t*)lithe_context_self())
+#define __itt_thread_yield()      lithe_context_yield()
+#else
 #define __itt_thread_id()         pthread_self()
 #define __itt_thread_yield()      sched_yield()
+#endif
 #if ITT_ARCH==ITT_ARCH_IA64
 #ifdef __INTEL_COMPILER
 #define __TBB_machine_fetchadd4(addr, val) __fetchadd4_acq((void *)addr, val)

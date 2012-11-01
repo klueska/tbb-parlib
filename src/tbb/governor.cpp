@@ -36,6 +36,10 @@
 
 #include "dynamic_link.h"
 
+#if USE_LITHE
+#include "tbb/tbb_lithe.h"
+#endif 
+
 namespace tbb {
 namespace internal {
 
@@ -79,7 +83,9 @@ namespace rml {
 }
 
 void governor::acquire_resources () {
-#if USE_PTHREAD
+#if USE_LITHE
+    int status = theTLS.create((lithe_cls_dtor_t)auto_terminate);
+#elif USE_PTHREAD
     int status = theTLS.create(auto_terminate);
 #else
     int status = theTLS.create();
@@ -165,13 +171,25 @@ generic_scheduler* governor::init_scheduler( unsigned num_threads, stack_size_ty
             market::create_arena( num_threads - 1, stack_size ? stack_size : ThreadStackSize ) );
     __TBB_ASSERT(s, "Somehow a local scheduler creation for a master thread failed");
     s->my_auto_initialized = auto_init;
+#if USE_LITHE
+    tbb::lithe::scheduler *lithe_sched = new tbb::lithe::scheduler();
+    assert(lithe_sched);
+    lithe_sched_enter(lithe_sched);
+#endif
     return s;
 }
 
 void governor::terminate_scheduler( generic_scheduler* s ) {
     __TBB_ASSERT( s == theTLS.get(), "Attempt to terminate non-local scheduler instance" );
-    if( !--(s->my_ref_count) )
+    if( !--(s->my_ref_count) ) {
         s->cleanup_master();
+#if USE_LITHE
+        tbb::lithe::scheduler *lithe_sched = (tbb::lithe::scheduler*)lithe_sched_current();
+        lithe_sched->joinAll();
+        lithe_sched_exit();
+        free(lithe_sched);
+    }
+#endif
 }
 
 void governor::auto_terminate(void* arg){
@@ -214,6 +232,8 @@ __cilk_tbb_retcode governor::stack_op_handler( __cilk_tbb_stack_op op, void* dat
     void* current = theTLS.get();
 #if _WIN32||_WIN64
     uintptr_t thread_id = GetCurrentThreadId();
+#elif USE_LITHE
+    uintptr_t thread_id = uintptr_t((tbb::lithe::context_t*)lithe_context_self());
 #else
     uintptr_t thread_id = uintptr_t(pthread_self());
 #endif

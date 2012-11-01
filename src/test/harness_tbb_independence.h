@@ -34,7 +34,15 @@
 #define __TBB_NO_IMPLICIT_LINKAGE 1
 #include "tbb/tbb_machine.h"
 
+#if USE_LITHE
+#include <lithe/lithe.h>
+#define pthread_mutex_t spinlock_t
+#define PTHREAD_MUTEX_INITIALIZER SPINLOCK_UNLOCKED
+#define pthread_mutex_lock spinlock_lock
+#define pthread_mutex_unlock spinlock_unlock
+#else
 #include <pthread.h>
+#endif
 
 // Can't use Intel compiler intrinsic due to internal error reported by 10.1 compiler
 pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;

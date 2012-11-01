@@ -49,6 +49,9 @@ void recursive_mutex::scoped_lock::internal_acquire( recursive_mutex& m ) {
         __TBB_ASSERT(false,"recursive_mutex::scoped_lock: illegal mutex state");
         break;
     }
+#elif USE_LITHE
+    int error_code = lithe_mutex_lock(&m.impl);
+    __TBB_ASSERT_EX(!error_code,"recursive_mutex::scoped_lock: lithe_mutex_lock failed");
 #else
     int error_code = pthread_mutex_lock(&m.impl);
     __TBB_ASSERT_EX(!error_code,"recursive_mutex::scoped_lock: pthread_mutex_lock failed");
@@ -70,6 +73,9 @@ void recursive_mutex::scoped_lock::internal_release() {
         __TBB_ASSERT(false,"recursive_mutex::scoped_lock: illegal mutex state");
         break;
     }
+#elif USE_LITHE
+     int error_code = lithe_mutex_unlock(&my_mutex->impl);
+     __TBB_ASSERT_EX(!error_code, "recursive_mutex::scoped_lock: lithe_mutex_unlock failed");
 #else
      int error_code = pthread_mutex_unlock(&my_mutex->impl);
      __TBB_ASSERT_EX(!error_code, "recursive_mutex::scoped_lock: pthread_mutex_unlock failed");
@@ -93,6 +99,8 @@ bool recursive_mutex::scoped_lock::internal_try_acquire( recursive_mutex& m ) {
     bool result;
 #if _WIN32||_WIN64
     result = TryEnterCriticalSection(&m.impl)!=0;
+#elif USE_LITHE
+    result = lithe_mutex_trylock(&m.impl)==0;
 #else
     result = pthread_mutex_trylock(&m.impl)==0;
 #endif /* _WIN32||_WIN64 */
@@ -105,6 +113,16 @@ void recursive_mutex::internal_construct() {
 #if _WIN32||_WIN64
     InitializeCriticalSection(&impl);
     state = INITIALIZED;
+#elif USE_LITHE
+    lithe_mutexattr_t mtx_attr;
+    int error_code = lithe_mutexattr_init( &mtx_attr );
+    if( error_code )
+        tbb::internal::handle_perror(error_code,"recursive_mutex: lithe_mutexattr_init failed");
+
+    lithe_mutexattr_settype( &mtx_attr, LITHE_MUTEX_RECURSIVE );
+    error_code = lithe_mutex_init( &impl, &mtx_attr );
+    if( error_code )
+        tbb::internal::handle_perror(error_code,"recursive_mutex: lithe_mutex_init failed");
 #else
     pthread_mutexattr_t mtx_attr;
     int error_code = pthread_mutexattr_init( &mtx_attr );
@@ -134,6 +152,8 @@ void recursive_mutex::internal_destroy() {
          break;
     }
     state = DESTROYED;
+#elif USE_LITHE
+    // Do nothing!
 #else
     int error_code = pthread_mutex_destroy(&impl); 
     __TBB_ASSERT_EX(!error_code,"recursive_mutex: pthread_mutex_destroy failed");

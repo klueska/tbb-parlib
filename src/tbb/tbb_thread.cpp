@@ -61,6 +61,8 @@ void tbb_thread_v3::join()
     if ( close_stat == 0 )
         handle_win_error( GetLastError() );
     my_thread_id = 0;
+#elif USE_LITHE
+    __TBB_ASSERT(0, "join not implemented for lithe contexts" );
 #else
     int status = pthread_join( my_handle, NULL );
     if( status )
@@ -76,6 +78,8 @@ void tbb_thread_v3::detach() {
     if ( status == 0 )
       handle_win_error( GetLastError() );
     my_thread_id = 0;
+#elif USE_LITHE
+    __TBB_ASSERT(0, "detach not implemented for lithe contexts" );
 #else
     int status = pthread_detach( my_handle );
     if( status )
@@ -98,6 +102,11 @@ void tbb_thread_v3::internal_start( __TBB_NATIVE_THREAD_ROUTINE_PTR(start_routin
         my_handle = (HANDLE)status;
         my_thread_id = thread_id;
     }
+#elif USE_LITHE
+    tbb::lithe::context_t *context  = NULL;
+    tbb::lithe::scheduler *sched = (tbb::lithe::scheduler*)lithe_sched_current();
+    sched->context_create(&context, ThreadStackSize, start_routine, closure);
+    my_handle = context;
 #else
     pthread_t thread_handle;
     int status;
@@ -124,6 +133,8 @@ unsigned tbb_thread_v3::hardware_concurrency() {
 tbb_thread_v3::id thread_get_id_v3() {
 #if _WIN32||_WIN64
     return tbb_thread_v3::id( GetCurrentThreadId() );
+#elif USE_LITHE
+    return tbb_thread_v3::id((tbb::lithe::context_t*)lithe_context_self());
 #else
     return tbb_thread_v3::id( pthread_self() );
 #endif // _WIN32||_WIN64

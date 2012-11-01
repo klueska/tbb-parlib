@@ -32,7 +32,10 @@
 
 #include "TypeDefinitions.h" /* Also includes customization layer Customize.h */
 
-#if USE_PTHREAD
+#if USE_LITHE
+    #include "tbb/tbb_lithe.h"
+    typedef lithe_clskey_t *tls_key_t;
+#elif USE_PTHREAD
     // Some pthreads documentation says that <pthreads.h> must be first header.
     #include <pthread.h>
     typedef pthread_key_t tls_key_t;
@@ -40,7 +43,7 @@
     #include "tbb/machine/windows_api.h"
     typedef DWORD tls_key_t;
 #else
-    #error Must define USE_PTHREAD or USE_WINTHREAD
+    #error Must define USE_LITHE or USE_PTHREAD or USE_WINTHREAD
 #endif
 
 #include <stdio.h>
@@ -571,7 +574,11 @@ class RecursiveMallocCallProtector {
     // pointer to an automatic data of holding thread
     static void       *autoObjPtr;
     static MallocMutex rmc_mutex;
+#if USE_LITHE
+    static tbb::lithe::context_t *owner_thread;
+#else
     static pthread_t   owner_thread;
+#endif
 /* Under FreeBSD 8.0 1st call to any pthread function including pthread_self
    leads to pthread initialization, that causes malloc calls. As 1st usage of
    RecursiveMallocCallProtector can be before pthread initialized, pthread calls
@@ -603,7 +610,11 @@ public:
     RecursiveMallocCallProtector() : lock_acquired(NULL) {
         lock_acquired = new (scoped_lock_space) MallocMutex::scoped_lock( rmc_mutex );
         if (canUsePthread)
+#if USE_LITHE
+            owner_thread = (tbb::lithe::context_t*)lithe_context_self();
+#else
             owner_thread = pthread_self();
+#endif
         autoObjPtr = &scoped_lock_space;
     }
     ~RecursiveMallocCallProtector() {
@@ -618,7 +629,11 @@ public:
         // Some thread has an active recursive call protector; check if the current one.
         // Exact pthread_self based test
         if (canUsePthread) {
+#if USE_LITHE
+            if (owner_thread == (tbb::lithe::context_t*)lithe_context_self()) {
+#else
             if (pthread_equal( owner_thread, pthread_self() )) {
+#endif
                 mallocRecursionDetected = true;
                 return true;
             } else
@@ -640,7 +655,11 @@ public:
    from malloc to mmap for all large allocations with bad performance impact. */
             if (!canUsePthread) {
                 canUsePthread = true;
+#if USE_LITHE
+                owner_thread = (tbb::lithe::context_t*)lithe_context_self();
+#else
                 owner_thread = pthread_self();
+#endif
             }
 #endif
             free(malloc(1));

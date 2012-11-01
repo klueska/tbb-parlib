@@ -1924,7 +1924,7 @@ void server_thread::launch( size_t stack_size ) {
     thread_monitor::launch( thread_routine, this, stack_size, &this->my_index );
 #else
     thread_monitor::launch( thread_routine, this, stack_size );
-#endif /* USE_PTHREAD */
+#endif /* USE_PTHREAD || USE_LITHE */
 }
 
 void server_thread::sleep_perhaps( thread_state_t asleep ) {

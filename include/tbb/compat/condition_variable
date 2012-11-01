@@ -56,8 +56,8 @@ typedef CONDITION_VARIABLE* PCONDITION_VARIABLE;
 #endif
 
 #elif USE_LITHE
-#include <assert.h> // Remove once functions in place
-// Need to include a lithe specific convar implementation
+#include <assert.h> // Remove once all functions in place
+#include <lithe/condvar.h>
 #else /* if not _WIN32||_WIN64 or USE_LITHE*/
 #include <errno.h> // some systems need it for ETIMEDOUT
 #include <pthread.h>
@@ -262,9 +262,8 @@ void __TBB_EXPORTED_FUNC internal_condition_variable_notify_all( condvar_impl_t&
 bool __TBB_EXPORTED_FUNC internal_condition_variable_wait( condvar_impl_t& cv, mutex* mtx, const tick_count::interval_t* i = NULL );
 
 #elif USE_LITHE
-// Need to include a lithe specific convar implementation
-typedef void *condvar_impl_t;
-#else /* if !(_WIN32||_WIN64), i.e., POSIX threads */
+typedef lithe_condvar_t condvar_impl_t;
+#else /* if !(_WIN32||_WIN64||USE_LITHE), i.e., POSIX threads */
 typedef pthread_cond_t condvar_impl_t;
 #endif
 
@@ -284,8 +283,7 @@ public:
 #if _WIN32||_WIN64
         internal_initialize_condition_variable( my_cv ); 
 #elif USE_LITHE
-		// Need to include a lithe specific convar implementation
-		assert(0);
+        lithe_condvar_init(&my_cv);
 #else
         pthread_cond_init( &my_cv, NULL );
 #endif
@@ -297,8 +295,7 @@ public:
 #if _WIN32||_WIN64
         internal_destroy_condition_variable( my_cv );
 #elif USE_LITHE
-		// Need to include a lithe specific convar implementation
-		assert(0);
+        // Do nothing!
 #else
         pthread_cond_destroy( &my_cv );
 #endif
@@ -309,8 +306,7 @@ public:
 #if _WIN32||_WIN64
         internal_condition_variable_notify_one( my_cv ); 
 #elif USE_LITHE
-		// Need to include a lithe specific convar implementation
-		assert(0);
+        lithe_condvar_signal(&my_cv);
 #else
         pthread_cond_signal( &my_cv );
 #endif
@@ -321,8 +317,7 @@ public:
 #if _WIN32||_WIN64
         internal_condition_variable_notify_all( my_cv ); 
 #elif USE_LITHE
-		// Need to include a lithe specific convar implementation
-		assert(0);
+        lithe_condvar_broadcast(&my_cv);
 #else
         pthread_cond_broadcast( &my_cv );
 #endif
@@ -401,8 +396,14 @@ inline cv_status condition_variable::wait_for( unique_lock<mutex>& lock, const t
 #elif USE_LITHE
 inline void condition_variable::wait( unique_lock<mutex>& lock )
 {
-	assert(0);
-	assert(lock); // to remove warning
+    __TBB_ASSERT( lock.owns, NULL );
+    lock.owns = false;
+    if( lithe_condvar_wait( &my_cv, lock.mutex()->native_handle() ) ) {
+        lock.owns = true;
+        throw_exception_v4( tbb::internal::eid_condvar_wait_failed );
+    }
+    // upon successful return, the mutex has been locked and is owned by the calling thread.
+    lock.owns = true;
 }
 inline cv_status condition_variable::wait_for( unique_lock<mutex>& lock, const tick_count::interval_t& i )
 {
@@ -411,7 +412,7 @@ inline cv_status condition_variable::wait_for( unique_lock<mutex>& lock, const t
 	assert(&i); // to remove warning
 }
 
-#else /* !(_WIN32||_WIN64)  && !USE_LITHE */
+#else /* !(_WIN32||_WIN64||USE_LITHE) */
 inline void condition_variable::wait( unique_lock<mutex>& lock )
 {
     __TBB_ASSERT( lock.owns, NULL );
@@ -463,7 +464,7 @@ inline cv_status condition_variable::wait_for( unique_lock<mutex>& lock, const t
     lock.owns = true;
     return rc;
 }
-#endif /* !(_WIN32||_WIN64) */
+#endif /* !(_WIN32||_WIN64||USE_LITHE)*/
 
 } // namespace interface5
 

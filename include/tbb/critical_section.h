@@ -31,6 +31,8 @@
 
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
+#elif USE_LITHE
+#include <lithe/mutex.h>
 #else
 #include <pthread.h>
 #include <errno.h>
@@ -48,6 +50,8 @@ namespace tbb {
 class critical_section_v4 : internal::no_copy {
 #if _WIN32||_WIN64
     CRITICAL_SECTION my_impl;
+#elif USE_LITHE
+    lithe_mutex_t my_impl;
 #else
     pthread_mutex_t my_impl;
 #endif
@@ -59,6 +63,8 @@ public:
     critical_section_v4() { 
 #if _WIN32||_WIN64
         InitializeCriticalSection(&my_impl);
+#elif USE_LITHE
+        lithe_mutex_init(&my_impl, NULL);
 #else
         pthread_mutex_init(&my_impl, NULL);
 #endif
@@ -69,6 +75,8 @@ public:
         __TBB_ASSERT(my_tid == tbb_thread::id(), "Destroying a still-held critical section");
 #if _WIN32||_WIN64
         DeleteCriticalSection(&my_impl); 
+#elif USE_LITHE
+        // Do nothing!
 #else
         pthread_mutex_destroy(&my_impl);
 #endif
@@ -92,6 +100,9 @@ public:
         if(local_tid == my_tid) throw_exception( eid_improper_lock );
 #if _WIN32||_WIN64
         EnterCriticalSection( &my_impl );
+#elif USE_LITHE
+        int rval = lithe_mutex_lock(&my_impl);
+        __TBB_ASSERT_EX(!rval, "critical_section::lock: lithe_mutex_lock failed");
 #else
         int rval = pthread_mutex_lock(&my_impl);
         __TBB_ASSERT_EX(!rval, "critical_section::lock: pthread_mutex_lock failed");
@@ -106,6 +117,11 @@ public:
         if(local_tid == my_tid) return false;
 #if _WIN32||_WIN64
         gotlock = TryEnterCriticalSection( &my_impl ) != 0;
+#elif USE_LITHE
+        int rval = lithe_mutex_trylock(&my_impl);
+        // valid returns are 0 (locked) and [EBUSY]
+        __TBB_ASSERT(rval == 0 || rval == EBUSY, "critical_section::trylock: lithe_mutex_trylock failed");
+        gotlock = rval == 0;
 #else
         int rval = pthread_mutex_trylock(&my_impl);
         // valid returns are 0 (locked) and [EBUSY]
@@ -123,6 +139,9 @@ public:
         my_tid = tbb_thread::id();
 #if _WIN32||_WIN64
         LeaveCriticalSection( &my_impl );
+#elif USE_LITHE
+        int rval = lithe_mutex_unlock(&my_impl);
+        __TBB_ASSERT_EX(!rval, "critical_section::unlock: lithe_mutex_unlock failed");
 #else
         int rval = pthread_mutex_unlock(&my_impl);
         __TBB_ASSERT_EX(!rval, "critical_section::unlock: pthread_mutex_unlock failed");

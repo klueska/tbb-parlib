@@ -33,6 +33,10 @@
 #include "machine/windows_api.h"
 #define __TBB_NATIVE_THREAD_ROUTINE unsigned WINAPI
 #define __TBB_NATIVE_THREAD_ROUTINE_PTR(r) unsigned (WINAPI* r)( void* )
+#elif USE_LITHE
+#define __TBB_NATIVE_THREAD_ROUTINE void
+#define __TBB_NATIVE_THREAD_ROUTINE_PTR(r) void (*r)( void* )
+#include "tbb/tbb_lithe.h"
 #else
 #define __TBB_NATIVE_THREAD_ROUTINE void*
 #define __TBB_NATIVE_THREAD_ROUTINE_PTR(r) void* (*r)( void* )
@@ -84,7 +88,9 @@ namespace internal {
             thread_closure_0 *self = static_cast<thread_closure_0*>(c);
             self->function();
             delete self;
+#if !USE_LITHE
             return 0;
+#endif
         }
         thread_closure_0( const F& f ) : function(f) {}
     };
@@ -121,6 +127,8 @@ namespace internal {
     public:
 #if _WIN32||_WIN64
         typedef HANDLE native_handle_type; 
+#elif USE_LITHE
+        typedef tbb::lithe::context_t *native_handle_type; 
 #else
         typedef pthread_t native_handle_type; 
 #endif // _WIN32||_WIN64
@@ -197,6 +205,9 @@ namespace internal {
 #if _WIN32||_WIN64
         DWORD my_id;
         id( DWORD id_ ) : my_id(id_) {}
+#elif USE_LITHE
+        tbb::lithe::context_t *my_id;
+        id( tbb::lithe::context_t *id_ ) : my_id(id_) {}
 #else
         pthread_t my_id;
         id( pthread_t id_ ) : my_id(id_) {}

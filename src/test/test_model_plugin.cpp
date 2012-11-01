@@ -163,6 +163,18 @@ int use_lot_of_tls() {
     }
     for( int i=0; i<10; ++i )
         TlsFree(last_handles[i]);
+#elif USE_LITHE
+    lithe_clskey_t *last_handles[10];
+    lithe_clskey_t *result;
+    int setspecific_dummy=10;
+    while(count < 4096) {
+        result = lithe_clskey_create(NULL);
+        last_handles[++count%10] = result;
+        lithe_context_set_cls(result, &setspecific_dummy);
+    }
+    REMARK("Created %d keys\n", count);
+    for( int i=0; i<10; ++i )
+        lithe_clskey_delete(last_handles[i]);
 #else
     pthread_key_t last_handles[10];
     pthread_key_t result;

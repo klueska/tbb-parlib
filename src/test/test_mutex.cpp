@@ -578,10 +578,10 @@ int TestMain () {
 
             TestTryAcquire_OneThread<tbb::spin_mutex>("Spin Mutex");
             TestTryAcquire_OneThread<tbb::queuing_mutex>("Queuing Mutex");
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
             // under ifdef because on Windows tbb::mutex is reenterable and the test will fail
             TestTryAcquire_OneThread<tbb::mutex>("Wrapper Mutex");
-#endif /* USE_PTHREAD */
+#endif /* USE_PTHREAD || USE_LITHE */
             TestTryAcquire_OneThread<tbb::recursive_mutex>( "Recursive Mutex" );
             TestTryAcquire_OneThread<tbb::spin_rw_mutex>("Spin RW Mutex"); // only tests try_acquire for writers
             TestTryAcquire_OneThread<tbb::queuing_rw_mutex>("Queuing RW Mutex"); // only tests try_acquire for writers
@@ -600,10 +600,10 @@ int TestMain () {
             TestISO<tbb::recursive_mutex>( "ISO Recursive Mutex" );
             TestISO<tbb::critical_section>( "ISO Critical Section" );
             TestTryAcquire_OneThreadISO<tbb::spin_mutex>( "ISO Spin Mutex" );
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
             // under ifdef because on Windows tbb::mutex is reenterable and the test will fail
             TestTryAcquire_OneThreadISO<tbb::mutex>( "ISO Mutex" );
-#endif /* USE_PTHREAD */
+#endif /* USE_PTHREAD || USE_LITHE*/
             TestTryAcquire_OneThreadISO<tbb::spin_rw_mutex>( "ISO Spin RW Mutex" );
             TestTryAcquire_OneThreadISO<tbb::recursive_mutex>( "ISO Recursive Mutex" );
             TestTryAcquire_OneThreadISO<tbb::critical_section>( "ISO Critical Section" );

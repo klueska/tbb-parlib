@@ -229,7 +229,9 @@ __RML_DECL_THREAD_ROUTINE private_worker::thread_routine( void* arg ) {
     XSetThreadProcessor(GetCurrentThread(), HWThreadIndex);
 #endif
     self->run();
+#if !USE_LITHE
     return 0;
+#endif
 }
 #if _MSC_VER && !defined(__INTEL_COMPILER)
     #pragma warning(pop)
@@ -288,6 +290,8 @@ inline void private_worker::wake_or_launch() {
     if( my_state==st_init && my_state.compare_and_swap( st_starting, st_init )==st_init ) {
 #if USE_WINTHREAD
         thread_monitor::launch( thread_routine, this, my_server.my_stack_size, &this->my_index );
+#elif USE_LITHE
+        thread_monitor::launch( thread_routine, this, my_server.my_stack_size );
 #elif USE_PTHREAD
         {
         affinity_helper fpa;

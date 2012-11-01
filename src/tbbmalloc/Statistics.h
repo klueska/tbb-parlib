@@ -91,7 +91,7 @@ static inline void STAT_print(int thread)
         return;
 
     char filename[100];
-#if USE_PTHREAD
+#if USE_PTHREAD || USE_LITHE
     sprintf(filename, "stat_ScalableMalloc_proc%04d_thr%04d.log", getpid(), thread);
 #else
     sprintf(filename, "stat_ScalableMalloc_thr%04d.log", thread);

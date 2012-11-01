@@ -31,6 +31,8 @@
 
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
+#elif USE_LITHE
+#include <lithe/mutex.h>
 #else
 #include <pthread.h>
 #endif /* _WIN32||_WIN64 */
@@ -53,6 +55,16 @@ public:
 #else
   #if _WIN32||_WIN64
         InitializeCriticalSection(&impl);
+  #elif USE_LITHE
+        lithe_mutexattr_t mtx_attr;
+        int error_code = lithe_mutexattr_init( &mtx_attr );
+        if( error_code )
+            tbb::internal::handle_perror(error_code,"recursive_mutex: lithe_mutexattr_init failed");
+
+        lithe_mutexattr_settype( &mtx_attr, LITHE_MUTEX_RECURSIVE );
+        error_code = lithe_mutex_init( &impl, &mtx_attr );
+        if( error_code )
+            tbb::internal::handle_perror(error_code,"recursive_mutex: lithe_mutex_init failed");
   #else
         pthread_mutexattr_t mtx_attr;
         int error_code = pthread_mutexattr_init( &mtx_attr );
@@ -75,6 +87,8 @@ public:
 #else
   #if _WIN32||_WIN64
         DeleteCriticalSection(&impl);
+  #elif USE_LITHE
+        // Do nothing!
   #else
         pthread_mutex_destroy(&impl); 
 
@@ -170,6 +184,8 @@ public:
 #else
   #if _WIN32||_WIN64
         EnterCriticalSection(&impl);
+  #elif USE_LITHE
+        lithe_mutex_lock(&impl);
   #else
         pthread_mutex_lock(&impl);
   #endif /* _WIN32||_WIN64 */
@@ -185,6 +201,8 @@ public:
 #else        
   #if _WIN32||_WIN64
         return TryEnterCriticalSection(&impl)!=0;
+  #elif USE_LITHE
+        return lithe_mutex_trylock(&impl)==0;
   #else
         return pthread_mutex_trylock(&impl)==0;
   #endif /* _WIN32||_WIN64 */
@@ -201,6 +219,8 @@ public:
 #else
   #if _WIN32||_WIN64
         LeaveCriticalSection(&impl);
+  #elif USE_LITHE
+        lithe_mutex_unlock(&impl);
   #else
         pthread_mutex_unlock(&impl);
   #endif /* _WIN32||_WIN64 */
@@ -210,6 +230,8 @@ public:
     //! Return native_handle
   #if _WIN32||_WIN64
     typedef LPCRITICAL_SECTION native_handle_type;
+  #elif USE_LITHE
+    typedef lithe_mutex_t* native_handle_type;
   #else
     typedef pthread_mutex_t* native_handle_type;
   #endif
@@ -222,6 +244,8 @@ private:
         INITIALIZED=0x1234,
         DESTROYED=0x789A,
     } state;
+#elif USE_LITHE
+    lithe_mutex_t impl;
 #else
     pthread_mutex_t impl;
 #endif /* _WIN32||_WIN64 */

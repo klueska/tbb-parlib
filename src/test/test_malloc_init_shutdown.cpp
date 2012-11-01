@@ -148,14 +148,19 @@ struct TestThread: NoAssign {
     TestThread(int ) {}
 
     void operator()( int /*id*/ ) const {
-        pthread_key_t key;
-
         currSmall = scalable_malloc(8);
         ASSERT(!prevSmall || currSmall==prevSmall, "Possible memory leak");
         currLarge = scalable_malloc(32*1024);
         ASSERT(!prevLarge || currLarge==prevLarge, "Possible memory leak");
+#if USE_LITHE
+        lithe_clskey_t *key;
+        key = lithe_clskey_create((lithe_cls_dtor_t)&threadDtor);
+        lithe_context_set_cls(key, (void*)42);
+#else
+        pthread_key_t key;
         pthread_key_create( &key, &threadDtor );
         pthread_setspecific(key, (const void*)42);
+#endif
     }
 };
 
