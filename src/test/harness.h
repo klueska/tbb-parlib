@@ -358,8 +358,8 @@ public:
         const size_t stack_size = 4*MByte;
 #endif
 #if USE_LITHE
-        lithe_sched_enter(&sched);
-        sched.context_create(&thread_id, stack_size, thread_function, this);
+		tbb::lithe::scheduler *sched = (tbb::lithe::scheduler*)lithe_sched_current();
+        sched->context_create(&thread_id, stack_size, thread_function, this);
 #else
         pthread_attr_t attr_stack;
         int status = pthread_attr_init(&attr_stack);
@@ -382,9 +382,6 @@ public:
         DWORD status = WaitForSingleObject( thread_handle, INFINITE );
         ASSERT( status!=WAIT_FAILED, "WaitForSingleObject failed" );
         CloseHandle( thread_handle );
-#elif USE_LITHE
-        sched.joinAll();
-        lithe_sched_exit();
 #elif USE_PTHREAD
         int status = pthread_join( thread_id, NULL );
         ASSERT( !status, "pthread_join failed" );
@@ -399,7 +396,6 @@ private:
     HANDLE thread_handle;
 #elif USE_LITHE
     tbb::lithe::context_t *thread_id;
-    tbb::lithe::scheduler sched;
 #else
     pthread_t thread_id;
 #endif
@@ -436,6 +432,10 @@ void NativeParallelFor( Index n, const Body& body ) {
         // Allocate array to hold the tasks
         task* array = static_cast<task*>(operator new( n*sizeof(task) ));
 
+#if USE_LITHE
+        tbb::lithe::scheduler sched;
+        lithe_sched_enter(&sched);
+#endif
         // Construct the tasks
         for( Index i=0; i!=n; ++i )
             new( &array[i] ) task(i,body);
@@ -444,11 +444,16 @@ void NativeParallelFor( Index n, const Body& body ) {
         for( Index i=0; i!=n; ++i )
             array[i].start();
 
+#if USE_LITHE
+        sched.joinAll();
+        lithe_sched_exit();
+#else
         // Wait for the tasks to finish and destroy each one.
         for( Index i=n; i; --i ) {
             array[i-1].wait_to_finish();
             array[i-1].~task();
         }
+#endif
 
         // Deallocate the task array
         operator delete(array);
