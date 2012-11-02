@@ -60,7 +60,7 @@
 namespace tbb {
 namespace internal {
 
-#if __linux__ || __FreeBSD_version >= 701000
+#if (__linux__ || __FreeBSD_version >= 701000) && !USE_LITHE
 
 static void set_affinity_mask( size_t maskSize, const basic_mask_t* threadMask ) {
 #if __linux__

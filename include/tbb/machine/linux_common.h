@@ -30,8 +30,13 @@
 #error Do not #include this internal file directly; use public TBB headers instead.
 #endif
 
+#if USE_LITHE
+#include <lithe/lithe.h>
+#define __TBB_Yield()  lithe_context_yield()
+#elif USE_PTHREAD
 #include <sched.h>
 #define __TBB_Yield()  sched_yield()
+#endif
 
 /* Futex definitions */
 #include <sys/syscall.h>

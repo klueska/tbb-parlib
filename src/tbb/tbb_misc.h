@@ -215,6 +215,11 @@ inline void run_initializer( bool (*f)(), atomic<do_once_state>& state ) {
     public:
         void protect_affinity_mask() {}
     };
+#elif _WIN32||_WIN64||USE_LITHE
+    class affinity_helper {
+    public:
+        void protect_affinity_mask() {}
+    };
 #elif __linux__ || __FreeBSD_version >= 701000
   #if __linux__
     typedef cpu_set_t basic_mask_t;
@@ -232,11 +237,6 @@ inline void run_initializer( bool (*f)(), atomic<do_once_state>& state ) {
         void protect_affinity_mask();
     };
 #elif defined(_SC_NPROCESSORS_ONLN)
-    class affinity_helper {
-    public:
-        void protect_affinity_mask() {}
-    };
-#elif _WIN32||_WIN64
     class affinity_helper {
     public:
         void protect_affinity_mask() {}
