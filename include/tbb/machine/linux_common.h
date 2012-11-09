@@ -31,8 +31,13 @@
 #endif
 
 #if USE_LITHE
+#include <sched.h>
 #include <lithe/lithe.h>
-#define __TBB_Yield()  lithe_context_yield()
+#define __TBB_Yield()  \
+{ \
+  if(in_hart_context()) sched_yield(); \
+  else lithe_context_yield(); \
+}
 #elif USE_PTHREAD
 #include <sched.h>
 #define __TBB_Yield()  sched_yield()
