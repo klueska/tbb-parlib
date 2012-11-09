@@ -34,7 +34,7 @@
 
 #if USE_LITHE
     #include "tbb/tbb_lithe.h"
-    typedef lithe_clskey_t *tls_key_t;
+    typedef dtls_key_t tls_key_t;
 #elif USE_PTHREAD
     // Some pthreads documentation says that <pthreads.h> must be first header.
     #include <pthread.h>

@@ -39,6 +39,7 @@
 #if _WIN32||_WIN64
 #include "machine/windows_api.h"
 #elif USE_LITHE
+#include <parlib/tls.h>
 #include <lithe/lithe.h>
 #else
 #include <pthread.h>
@@ -242,11 +243,11 @@ namespace interface6 {
             void set_tls(void * value) { TlsSetValue(my_key, (LPVOID)value); }
             void* get_tls() { return (void *)TlsGetValue(my_key); }
 #elif USE_LITHE
-            typedef lithe_clskey_t *tls_key_t;
-            void create_key() { my_key = lithe_clskey_create(NULL); }
-            void destroy_key() { lithe_clskey_delete(my_key); }
-            void set_tls( void * value ) const { lithe_context_set_cls(my_key, value); }
-            void* get_tls() const { return lithe_context_get_cls(my_key); }
+            typedef dtls_key_t tls_key_t;
+            void create_key() { my_key = dtls_key_create(NULL); }
+            void destroy_key() { dtls_key_delete(my_key); }
+            void set_tls( void * value ) const { set_dtls(my_key, value); }
+            void* get_tls() const { return get_dtls(my_key); }
 #else
             typedef pthread_key_t tls_key_t;
             void create_key() { pthread_key_create(&my_key, NULL); }

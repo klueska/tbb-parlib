@@ -44,9 +44,9 @@
     extern "C" { static void mallocThreadShutdownNotification(void*); }
 
 #elif USE_LITHE
-    #define TlsSetValue_func lithe_context_set_cls
-    #define TlsGetValue_func lithe_context_get_cls
-    inline void do_yield() {lithe_context_yield();}
+    #define TlsSetValue_func set_dtls
+    #define TlsGetValue_func get_dtls
+    inline void do_yield() { __TBB_Yield(); }
     #include <dlfcn.h>    /* for dlsym */
     extern "C" { static void mallocThreadShutdownNotification(void*); }
 
@@ -128,7 +128,7 @@ public:
 #if USE_WINTHREAD
         Tid_key = TlsAlloc();
 #elif USE_LITHE
-        Tid_key = lithe_clskey_create(NULL);
+        Tid_key = dtls_key_create(NULL);
 #else
         int status = pthread_key_create( &Tid_key, NULL );
         if ( status ) {
@@ -142,7 +142,7 @@ public:
 #if USE_WINTHREAD
             TlsFree( Tid_key );
 #elif USE_LITHE
-            lithe_clskey_delete(Tid_key);
+            dtls_key_delete(Tid_key);
 #else
             int status = pthread_key_delete( Tid_key );
             if ( status ) {
@@ -191,7 +191,7 @@ TLSKey::TLSKey()
 #if USE_WINTHREAD
     TLS_pointer_key = TlsAlloc();
 #elif USE_LITHE
-    TLS_pointer_key = lithe_clskey_create((lithe_cls_dtor_t)mallocThreadShutdownNotification);
+    TLS_pointer_key = dtls_key_create((dtls_dtor_t)mallocThreadShutdownNotification);
 #else
     int status = pthread_key_create( &TLS_pointer_key, mallocThreadShutdownNotification );
     if ( status ) {
@@ -206,7 +206,7 @@ TLSKey::~TLSKey()
 #if USE_WINTHREAD
     TlsFree(TLS_pointer_key);
 #elif USE_LITHE
-    lithe_clskey_delete(TLS_pointer_key);
+    dtls_key_delete(TLS_pointer_key);
 #else
     int status1 = pthread_key_delete(TLS_pointer_key);
     if ( status1 ) {

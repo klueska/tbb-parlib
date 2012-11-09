@@ -84,7 +84,7 @@ namespace rml {
 
 void governor::acquire_resources () {
 #if USE_LITHE
-    int status = theTLS.create((lithe_cls_dtor_t)auto_terminate);
+    int status = theTLS.create((dtls_dtor_t)auto_terminate);
 #elif USE_PTHREAD
     int status = theTLS.create(auto_terminate);
 #else
