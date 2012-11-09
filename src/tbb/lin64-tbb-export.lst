@@ -340,7 +340,11 @@ __TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v36detachEv )
 __TBB_SYMBOL( _ZN3tbb8internal16thread_get_id_v3Ev )
 __TBB_SYMBOL( _ZN3tbb8internal15free_closure_v3EPv )
 __TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v34joinEv )
+#if USE_LITHE
+__TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v314internal_startEPFvPvES2_ )
+#else
 __TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v314internal_startEPFPvS2_ES2_ )
+#endif
 __TBB_SYMBOL( _ZN3tbb8internal19allocate_closure_v3Em )
 __TBB_SYMBOL( _ZN3tbb8internal7move_v3ERNS0_13tbb_thread_v3ES2_ )
 __TBB_SYMBOL( _ZN3tbb8internal15thread_yield_v3Ev )
