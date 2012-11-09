@@ -103,7 +103,9 @@ namespace internal {
             thread_closure_1 *self = static_cast<thread_closure_1*>(c);
             self->function(self->arg1);
             delete self;
+#if !USE_LITHE
             return 0;
+#endif
         }
         thread_closure_1( const F& f, const X& x ) : function(f), arg1(x) {}
     };
@@ -116,7 +118,9 @@ namespace internal {
             thread_closure_2 *self = static_cast<thread_closure_2*>(c);
             self->function(self->arg1, self->arg2);
             delete self;
+#if !USE_LITHE
             return 0;
+#endif
         }
         thread_closure_2( const F& f, const X& x, const Y& y ) : function(f), arg1(x), arg2(y) {}
     };
