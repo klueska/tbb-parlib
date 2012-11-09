@@ -42,6 +42,11 @@
 #define __TBB_CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #endif
 
+/** Force build with Lithe support **/
+#ifndef USE_LITHE
+#define USE_LITHE 1
+#endif
+
 /** Presence of compiler features **/
 
 #if (__TBB_GCC_VERSION >= 40400) && !defined(__INTEL_COMPILER)
