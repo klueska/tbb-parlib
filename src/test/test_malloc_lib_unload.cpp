@@ -221,7 +221,7 @@ int TestMain () {
            "Memory consumption should not increase after 1st GetMemoryUsage() call");
 
     // expect that memory consumption stabilized after several runs
-    for (i=0; i<3; i++) {
+    for (i=0; i<25; i++) {
         std::size_t memory_in_use = GetMemoryUsage();
         for (int j=0; j<10; j++)
             NativeParallelFor( 1, Run() );
@@ -229,7 +229,7 @@ int TestMain () {
         if (memory_leak == 0)  // possibly too strong?
             break;
     }
-    if(3==i) {
+    if(25==i) {
         // not stabilized, could be leak
         REPORT( "Error: memory leak of up to %ld bytes\n", static_cast<long>(memory_leak));
         exit(1);

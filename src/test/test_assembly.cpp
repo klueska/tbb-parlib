@@ -138,6 +138,10 @@ static void TestPause() {
 }
 
 int TestMain () {
+#if USE_LITHE
+    tbb::lithe::scheduler sched;
+    lithe_sched_enter(&sched);
+#endif
     __TBB_TRY {
         TestLog2();
         TestTinyLock();
@@ -147,6 +151,10 @@ int TestMain () {
     } __TBB_CATCH(...) {
         ASSERT(0,"unexpected exception");
     }
+#if USE_LITHE
+    sched.joinAll();
+    lithe_sched_exit();
+#endif
     return Harness::Done;
 }
 #endif // __TBB_TEST_SKIP_BUILTINS_MODE

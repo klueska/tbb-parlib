@@ -63,15 +63,22 @@ void Test1 () {
     FinishedTasks = 0;
     tbb::aligned_space<TestTask1,MaxTasks> tasks;
 
+#if USE_LITHE
+    tbb::lithe::scheduler sched;
+    lithe_sched_enter(&sched);
+#endif
     for(int i=0; i<NTasks; ++i) {
         TestTask1* t = tasks.begin()+i;
         new(t) TestTask1(i%2==0, tf);
         t->start();
     }
-
+#if USE_LITHE
+    sched.joinAll();
+    lithe_sched_exit();
+#else
     Harness::Sleep(1000); // wait a second :)
+#endif
     ASSERT( FinishedTasks==NTasks, "Some threads appear to deadlock" );
-
     for(int i=0; i<NTasks; ++i) {
         TestTask1* t = tasks.begin()+i;
         t->wait_to_finish();
@@ -116,10 +123,19 @@ void Test2() {
     TestFunc2a func2a(barr);
     TestTask2a t2a(0, func2a);
     TestFunc2b func2b(barr, t2a);
+#if USE_LITHE
+    tbb::lithe::scheduler sched;
+    lithe_sched_enter(&sched);
+#endif
     NativeParallelForTask<int,TestFunc2b> t2b(1, func2b);
     FinishedTasks = 0;
     t2a.start(); t2b.start();
+#if USE_LITHE
+    sched.joinAll();
+    lithe_sched_exit();
+#else
     Harness::Sleep(1000); // wait a second :)
+#endif
     ASSERT( FinishedTasks==2, "Threads appear to deadlock" );
     t2b.wait_to_finish(); // t2a is monitored by t2b
 }
@@ -153,9 +169,9 @@ struct TestThread: NoAssign {
         currLarge = scalable_malloc(32*1024);
         ASSERT(!prevLarge || currLarge==prevLarge, "Possible memory leak");
 #if USE_LITHE
-        lithe_clskey_t *key;
-        key = lithe_clskey_create((lithe_cls_dtor_t)&threadDtor);
-        lithe_context_set_cls(key, (void*)42);
+        dtls_key_t key;
+        key = dtls_key_create((dtls_dtor_t)&threadDtor);
+        set_dtls(key, (void*)42);
 #else
         pthread_key_t key;
         pthread_key_create( &key, &threadDtor );

@@ -108,11 +108,17 @@ void TestWaitForAll () {
 typedef void (*TestFnPtr)();
 
 const TestFnPtr TestFuncsTable[] = {
-        TestTaskSelf, TestRootAllocation, TestChildAllocation, TestAdditionalChildAllocation,
+        TestTaskSelf,
+        TestRootAllocation,
+        TestChildAllocation,
+        TestAdditionalChildAllocation,
 #if __TBB_TASK_GROUP_CONTEXT
-        TestTaskGroupContextCreation, TestRootAllocationWithContext,
+        TestTaskGroupContextCreation,
+        TestRootAllocationWithContext,
 #endif /* __TBB_TASK_GROUP_CONTEXT */
-        TestSpawn, TestWaitForAll };
+//        TestSpawn,
+        TestWaitForAll
+};
 
 const int NumTestFuncs = sizeof(TestFuncsTable) / sizeof(TestFnPtr);
 
@@ -204,7 +210,9 @@ struct DriverThreadBody : NoAssign, Harness::NoAfterlife {
 };
 
 int TestMain () {
+#if !USE_LITHE
     // Do not use any TBB functionality in the main thread!
     NativeParallelFor( 2, DriverThreadBody() );
+#endif
     return Harness::Done;
 }

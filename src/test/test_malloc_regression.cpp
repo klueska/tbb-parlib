@@ -44,9 +44,17 @@ public:
 
 template<typename Body, typename Arg>
 void RunThread(const Body& body, const Arg& arg) {
+#if USE_LITHE
+    tbb::lithe::scheduler sched;
+    lithe_sched_enter(&sched);
+#endif
     NativeParallelForTask<Arg,Body> job(arg, body);
     job.start();
     job.wait_to_finish();
+#if USE_LITHE
+    sched.joinAll();
+    lithe_sched_exit();
+#endif
 }
 
 /*--------------------------------------------------------------------*/

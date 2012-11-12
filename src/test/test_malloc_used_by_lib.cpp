@@ -142,7 +142,7 @@ void ThreadsLoadUnload()
 }
 
 int TestMain () {
-    const int ITERS = 20;
+    const int ITERS = 100;
     int i;
     std::ptrdiff_t memory_leak = 0;
 
