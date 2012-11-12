@@ -40,6 +40,10 @@
 #include <mach/mach_init.h>
 #include <mach/error.h>
 
+#elif USE_LITHE
+#include <lithe/mutex.h>
+#include <lithe/semaphore.h>
+
 #else
 #include <semaphore.h>
 #ifdef TBB_USE_DEBUG
@@ -95,6 +99,27 @@ private:
     void init_semaphore(int start_cnt_) {
         kern_return_t ret = semaphore_create( mach_task_self(), &sem, SYNC_POLICY_FIFO, start_cnt_ );
         __TBB_ASSERT_EX( ret==err_none, "failed to create a semaphore" );
+    }
+};
+#elif USE_LITHE
+//! Edsger Dijkstra's counting semaphore
+class semaphore : no_copy {
+public:
+    //! ctor
+    semaphore(int start_cnt_ = 0) { init_semaphore(start_cnt_); }
+    //! dtor
+    ~semaphore() {}
+    //! wait/acquire
+    void P() {
+        while( lithe_sem_wait( &sem )!=0 );
+    }
+    //! post/release 
+    void V() { lithe_sem_post( &sem ); }
+private:
+    lithe_sem_t sem;
+    void init_semaphore(int start_cnt_) {
+        int ret = lithe_sem_init( &sem, start_cnt_ );
+        __TBB_ASSERT_EX( ret==0, "failed to create a semaphore" );
     }
 };
 #else /* Linux/Unix */
@@ -193,6 +218,31 @@ public:
 private:
     semaphore_t my_sem;
 };
+#elif USE_LITHE
+//! binary_semaphore for concurrent monitor
+class binary_semaphore : no_copy {
+public:
+    //! ctor
+    binary_semaphore() {
+        int ret = lithe_mutex_init(&mutex, NULL);
+        __TBB_ASSERT_EX( ret==0, "failed to create a semaphore" );
+    }
+    //! dtor
+    ~binary_semaphore() {}
+    //! wait/acquire
+    void P() { 
+        int ret = lithe_mutex_lock( &mutex );
+        __TBB_ASSERT_EX( ret==0, "lithe_mutex_lock() failed" );
+    }
+    //! post/release 
+    void V() {
+        int ret = lithe_mutex_unlock( &mutex );
+        __TBB_ASSERT_EX( ret==0, "lithe_mutex_unlock() failed" );
+    }
+private:
+    lithe_mutex_t mutex;
+};
+
 #else /* Linux/Unix */
 
 #if __TBB_USE_FUTEX
