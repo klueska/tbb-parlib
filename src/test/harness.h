@@ -382,6 +382,9 @@ public:
         DWORD status = WaitForSingleObject( thread_handle, INFINITE );
         ASSERT( status!=WAIT_FAILED, "WaitForSingleObject failed" );
         CloseHandle( thread_handle );
+#elif USE_LITHE
+        int status = 0;
+        ASSERT( !status, "wait_to_finish() failed" );
 #elif USE_PTHREAD
         int status = pthread_join( thread_id, NULL );
         ASSERT( !status, "pthread_join failed" );
