@@ -31,6 +31,10 @@
 
 #include "tbb/atomic.h"
 
+#if USE_LITHE
+extern "C" int lithe_lib_init(); 
+#endif
+
 namespace tbb {
 
 namespace internal {
@@ -76,7 +80,11 @@ public:
     //! Add initial reference to resources. 
     /** We assume that dynamic loading of the library prevents any other threads 
         from entering the library until this constructor has finished running. **/
+#if USE_LITHE
+    __TBB_InitOnce() { lithe_lib_init(); add_ref();}
+#else
     __TBB_InitOnce() { add_ref(); }
+#endif
 
     //! Remove the initial reference to resources.
     /** This is not necessarily the last reference if other threads are still running. **/
