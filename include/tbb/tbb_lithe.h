@@ -164,6 +164,7 @@ private:
     /* Add this child to our list of child schedulers */
     child_sched_t *child_wrapper = (child_sched_t*)malloc(sizeof(child_sched_t));
     child_wrapper->sched = child;
+    child_wrapper->requested_harts = 0;
     mcs_lock_qnode_t qnode = MCS_QNODE_INIT;
     mcs_lock_lock(&this->qlock, &qnode);
       STAILQ_INSERT_TAIL(&this->child_sched_list, child_wrapper, link);
