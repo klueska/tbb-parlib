@@ -188,8 +188,8 @@ void governor::terminate_scheduler( generic_scheduler* s ) {
         lithe_sched->joinAll();
         lithe_sched_exit();
         free(lithe_sched);
-    }
 #endif
+    }
 }
 
 void governor::auto_terminate(void* arg){
