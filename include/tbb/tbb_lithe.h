@@ -59,7 +59,7 @@ class scheduler: public ::lithe::Scheduler {
 public:
   scheduler()
   {
-    thread_count = 0;
+    num_contexts = 0;
     lithe_mutex_init(&mutex, NULL);
     lithe_condvar_init(&condvar);
     mcs_lock_init(&this->qlock);
@@ -76,7 +76,7 @@ public:
     context->start_routine = start_routine;
     context->arg = arg;
     lithe_mutex_lock(&mutex);
-    context->id = thread_count++;
+    context->id = num_contexts++;
     lithe_mutex_unlock(&mutex);
     schedule_context(context);
     *__context = context;
@@ -85,13 +85,13 @@ public:
   void joinAll()
   {
     lithe_mutex_lock(&mutex);
-    while(thread_count > 0) 
+    while(num_contexts > 0) 
       lithe_condvar_wait(&condvar, &mutex);
     lithe_mutex_unlock(&mutex);
   }
   
 private:
-  int thread_count;
+  int num_contexts;
   lithe_mutex_t mutex;
   lithe_condvar_t condvar;
   mcs_lock_t qlock;
@@ -109,8 +109,8 @@ private:
     destroy_dtls();
   
     lithe_mutex_lock(&sched->mutex);
-    sched->thread_count--;
-    if(sched->thread_count == 0)
+    sched->num_contexts--;
+    if(sched->num_contexts == 0)
       lithe_condvar_signal(&sched->condvar);
     lithe_mutex_unlock(&sched->mutex);
   }
