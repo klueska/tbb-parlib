@@ -103,8 +103,6 @@ private:
     context_t *self = (context_t*)__arg;
     scheduler *sched = (scheduler*)lithe_sched_current();
   
-    lithe_mutex_lock(&sched->mutex);
-    lithe_mutex_unlock(&sched->mutex);
     self->start_routine(self->arg);
     destroy_dtls();
   
