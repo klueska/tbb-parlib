@@ -129,7 +129,7 @@ private:
     mcs_lock_lock(&this->qlock, &qnode);
       STAILQ_INSERT_TAIL(&this->context_list, context, link);
     mcs_lock_unlock(&this->qlock, &qnode);
-    lithe_hart_request(max_harts());
+    lithe_hart_request(1);
   }
 
   /* Below overwritten from lithe::Scheduler */
@@ -142,21 +142,13 @@ private:
       child_sched_t *s = STAILQ_FIRST(&this->child_sched_list);
       while(s != NULL) { 
         if(s->sched == child) {
-          s->requested_harts = k;
+          s->requested_harts += k;
           break;
         }
         s = STAILQ_NEXT(s, link);
       }
     mcs_lock_unlock(&this->qlock, &qnode);
     return lithe_hart_request(k);
-  }
-
-  virtual void hart_return(lithe_sched_t *child)
-  {
-	/* Just call hart_enter() as that is where all of our logic for figuring
-     * out what to do with a newly granted hart is. */
-    assert(child);
-    hart_enter();
   }
 
   virtual void child_enter(lithe_sched_t *child)
@@ -189,6 +181,14 @@ private:
         s = n;
       }
     mcs_lock_unlock(&this->qlock, &qnode);
+  }
+
+  virtual void hart_return(lithe_sched_t *child)
+  {
+    /* Just call hart_enter() as that is where all of our logic for figuring
+     * out what to do with a newly granted hart is. */
+    assert(child);
+    hart_enter();
   }
 
   virtual void hart_enter()
