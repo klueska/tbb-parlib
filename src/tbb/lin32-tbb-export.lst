@@ -340,6 +340,8 @@ __TBB_SYMBOL( _ZN3tbb8internal25concurrent_vector_base_v337internal_grow_to_at_l
 /* tbb_thread */
 #if __MINGW32__
 __TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v314internal_startEPFjPvES2_ )
+#elif USE_LITHE
+__TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v314internal_startEPFvPvES2_ )
 #else
 __TBB_SYMBOL( _ZN3tbb8internal13tbb_thread_v314internal_startEPFPvS2_ES2_ )
 #endif
