@@ -5,9 +5,9 @@
 #ifndef tbb_tbb_lithe_H
 #define tbb_tbb_lithe_H
 
+#include <sys/queue.h>
 #include <parlib/tls.h>
 #include <parlib/mcs.h>
-#include <parlib/queue.h>
 #include <lithe/mutex.h>
 #include <lithe/condvar.h>
 #include <lithe/lithe.hh>
