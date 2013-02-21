@@ -36,6 +36,7 @@
 tbb_root?=..
 BUILDING_PHASE:=0
 include ../build/common.inc
+EXCLUDED_EXAMPLES = task_priority/fractal
 
 #check, if tbb_root is not absolute path (the filter keeps only /* paths)
 ifeq ($(filter /% $(SLASH)%, $(subst :, ,$(tbb_root)) ),)
@@ -48,6 +49,8 @@ ifeq ($(tbb_os),windows)
     ifeq ($(UNIXMODE),1)
         EXAMPLE_MAKEFILE = Makefile
         EXAMPLES = $(wildcard */*/$(EXAMPLE_MAKEFILE))
+        EXCLUDED_EXAMPLES := $(patsubst %, %/$(EXAMPLE_MAKEFILE), $(EXCLUDED_EXAMPLES))
+        EXAMPLES := $(filter-out $(EXCLUDED_EXAMPLES),$(EXAMPLES))
         ifeq ($(compiler),gcc)
             override CXXFLAGS += -Wl,--enable-auto-import
         endif
@@ -57,6 +60,8 @@ ifeq ($(tbb_os),windows)
     else
         EXAMPLE_MAKEFILE = Makefile.windows
         EXAMPLES = $(wildcard */*/$(EXAMPLE_MAKEFILE))
+        EXCLUDED_EXAMPLES := $(patsubst %, %/$(EXAMPLE_MAKEFILE), $(EXCLUDED_EXAMPLES))
+        EXAMPLES := $(filter-out $(EXCLUDED_EXAMPLES),$(EXAMPLES))
         EXAMPLE_MAKEFILE := $(if $(EXAMPLES),Makefile.windows,Makefile)
         export INCLUDE := $(tbb_root)$(SLASH)include;$(INCLUDE)
         export LIB := $(work_dir)_release;$(work_dir)_debug;$(LIB)
@@ -68,6 +73,8 @@ ifeq ($(tbb_os),windows)
 else
     EXAMPLE_MAKEFILE = Makefile
     EXAMPLES := $(wildcard */*/$(EXAMPLE_MAKEFILE))
+    EXCLUDED_EXAMPLES := $(patsubst %, %/$(EXAMPLE_MAKEFILE), $(EXCLUDED_EXAMPLES))
+    EXAMPLES := $(filter-out $(EXCLUDED_EXAMPLES),$(EXAMPLES))
     # platform-specific settings
     ifeq ($(arch),ia64)
         override CXXFLAGS += $(PIC_KEY)
