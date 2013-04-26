@@ -11,6 +11,13 @@
 #include <lithe/mutex.h>
 #include <lithe/condvar.h>
 #include <lithe/lithe.hh>
+#include <assert.h>
+
+//#define LITHE_DEBUG
+#ifndef LITHE_DEBUG
+# undef assert
+# define assert(x) ({(void)(x);})
+#endif
 
 namespace tbb {
 namespace lithe {
@@ -59,6 +66,7 @@ class scheduler: public ::lithe::Scheduler {
 public:
   scheduler()
   {
+    main_context = allocate_context(4096);
     num_contexts = 0;
     lithe_mutex_init(&mutex, NULL);
     lithe_condvar_init(&condvar);
