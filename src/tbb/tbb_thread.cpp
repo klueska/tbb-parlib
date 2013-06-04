@@ -103,8 +103,8 @@ void tbb_thread_v3::internal_start( __TBB_NATIVE_THREAD_ROUTINE_PTR(start_routin
         my_thread_id = thread_id;
     }
 #elif USE_LITHE
-    tbb::lithe::context_t *context  = NULL;
-    tbb::lithe::scheduler *sched = (tbb::lithe::scheduler*)lithe_sched_current();
+    tbb::lithe::Context *context  = NULL;
+    tbb::lithe::Scheduler *sched = (tbb::lithe::Scheduler*)lithe_sched_current();
     sched->context_create(&context, ThreadStackSize, start_routine, closure);
     my_handle = context;
 #else
@@ -134,7 +134,7 @@ tbb_thread_v3::id thread_get_id_v3() {
 #if _WIN32||_WIN64
     return tbb_thread_v3::id( GetCurrentThreadId() );
 #elif USE_LITHE
-    return tbb_thread_v3::id((tbb::lithe::context_t*)lithe_context_self());
+    return tbb_thread_v3::id((tbb::lithe::Context*)lithe_context_self());
 #else
     return tbb_thread_v3::id( pthread_self() );
 #endif // _WIN32||_WIN64

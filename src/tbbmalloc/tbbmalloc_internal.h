@@ -575,7 +575,7 @@ class RecursiveMallocCallProtector {
     static void       *autoObjPtr;
     static MallocMutex rmc_mutex;
 #if USE_LITHE
-    static tbb::lithe::context_t *owner_thread;
+    static tbb::lithe::Context *owner_thread;
 #else
     static pthread_t   owner_thread;
 #endif
@@ -611,7 +611,7 @@ public:
         lock_acquired = new (scoped_lock_space) MallocMutex::scoped_lock( rmc_mutex );
         if (canUsePthread)
 #if USE_LITHE
-            owner_thread = (tbb::lithe::context_t*)lithe_context_self();
+            owner_thread = (tbb::lithe::Context*)lithe_context_self();
 #else
             owner_thread = pthread_self();
 #endif
@@ -630,7 +630,7 @@ public:
         // Exact pthread_self based test
         if (canUsePthread) {
 #if USE_LITHE
-            if (owner_thread == (tbb::lithe::context_t*)lithe_context_self()) {
+            if (owner_thread == (tbb::lithe::Context*)lithe_context_self()) {
 #else
             if (pthread_equal( owner_thread, pthread_self() )) {
 #endif
@@ -656,7 +656,7 @@ public:
             if (!canUsePthread) {
                 canUsePthread = true;
 #if USE_LITHE
-                owner_thread = (tbb::lithe::context_t*)lithe_context_self();
+                owner_thread = (tbb::lithe::Context*)lithe_context_self();
 #else
                 owner_thread = pthread_self();
 #endif

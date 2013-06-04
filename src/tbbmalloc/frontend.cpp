@@ -564,7 +564,7 @@ bool ExtMemoryPool::release16KBCaches()
 #if MALLOC_CHECK_RECURSION
 MallocMutex RecursiveMallocCallProtector::rmc_mutex;
 #if USE_LITHE
-tbb::lithe::context_t *RecursiveMallocCallProtector::owner_thread;
+tbb::lithe::Context *RecursiveMallocCallProtector::owner_thread;
 #else
 pthread_t   RecursiveMallocCallProtector::owner_thread;
 #endif

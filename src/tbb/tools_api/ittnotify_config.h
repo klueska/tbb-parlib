@@ -197,7 +197,7 @@ typedef CRITICAL_SECTION  mutex_t;
 #if USE_LITHE
 #include "tbb/tbb_lithe.h"
 typedef void*           lib_t;
-typedef tbb::lithe::context_t *TIDT;
+typedef tbb::lithe::Context *TIDT;
 typedef lithe_mutex_t   mutex_t;
 #define MUTEX_INITIALIZER LITHE_MUTEX_INITIALIZER
 #else
@@ -277,7 +277,7 @@ INLINE int __itt_interlocked_increment(volatile long* ptr)
 #define __itt_fstrcpyn(s1, s2, l) strncpy(s1, s2, l)
 #define __itt_fstrdup(s)          strdup(s)
 #if USE_LITHE
-#define __itt_thread_id()         ((tbb::lithe::context_t*)lithe_context_self())
+#define __itt_thread_id()         ((lithe::Context*)lithe_context_self())
 #define __itt_thread_yield()      lithe_context_yield()
 #else
 #define __itt_thread_id()         pthread_self()

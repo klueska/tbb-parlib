@@ -132,7 +132,7 @@ namespace internal {
 #if _WIN32||_WIN64
         typedef HANDLE native_handle_type; 
 #elif USE_LITHE
-        typedef tbb::lithe::context_t *native_handle_type; 
+        typedef tbb::lithe::Context *native_handle_type; 
 #else
         typedef pthread_t native_handle_type; 
 #endif // _WIN32||_WIN64
@@ -210,8 +210,8 @@ namespace internal {
         DWORD my_id;
         id( DWORD id_ ) : my_id(id_) {}
 #elif USE_LITHE
-        tbb::lithe::context_t *my_id;
-        id( tbb::lithe::context_t *id_ ) : my_id(id_) {}
+        tbb::lithe::Context *my_id;
+        id( tbb::lithe::Context *id_ ) : my_id(id_) {}
 #else
         pthread_t my_id;
         id( pthread_t id_ ) : my_id(id_) {}
