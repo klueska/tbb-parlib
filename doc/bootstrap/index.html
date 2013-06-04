@@ -1,0 +1,245 @@
+<!DOCTYPE html><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>TBB-Lithe: A Port of Intel's Thread Building Blocks to Lithe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="./assets/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        line-height: 1.2em;
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .page-header {
+        padding-top: 40px;
+        margin-top: -40px;
+      }
+    </style>
+    <link href="./assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="./assets/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="./assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="./assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="./assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="./assets/ico/apple-touch-icon-57-precomposed.png">
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38088937-4']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">TBB-Lithe</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#limitations">Limitations</a></li>
+              <li><a href="#downloads">Download</a></li>
+              <li><a href="#testing">Testing</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit">
+        <h1>
+          TBB-Lithe
+        </h1>
+        <p>A Port of Intel's Thread Building Blocks to Lithe</p>
+        <a href="https://github.com/klueska/tbb-lithe/" class="btn btn-primary btn-large" >View project on GitHub</a>
+      </div>
+
+      <section id="about">
+      <div class="page-header"><h1>About TBB-Lithe</h1></div>
+      <p> 
+        This is the Lithe port of TBB. It is based on the following release: 
+      </p>
+         
+<pre>
+June 28, 2012: Intel® Threading Building Blocks 4.0 Update 5 
+tbb40_20120613oss stable release 
+<a href="http://threadingbuildingblocks.org/ver.php?fid=187">
+http://threadingbuildingblocks.org/ver.php?fid=187</a></pre>
+
+      <p>
+		More information about Lithe can be found <a
+        href="http://lithe.eecs.berkeley.edu">here</a>.
+      </p>
+      <p>
+		More information about TBB can be found <a
+        href="http://threadingbuildingblocks.org">here</a>.
+      </p>
+
+      <section id="limitations">
+      <div class="page-header"><h1>Limitations</h1></div>
+      <p>
+        Currently use of the following TBB interface is unsupported:
+        <ul>
+          <li>
+            <code>tbb::task_group_context</code>
+          </li>
+        </ul>
+      </p>
+	  <p> 
+        To report bugs or notify us of any limitations we have not yet encountered,
+        submit an issue on github at 
+<pre><a href="https://github.com/klueska/tbb-lithe/issues">https://github.com/klueska/tbb-lithe/issues</a></pre>
+	  </p> 
+
+      <section id="downloads">
+      <div class="page-header"><h1>Download and Installation</h1></div>
+      <p>
+		The changes to TBB that make up TBB-Lithe are made available under a <a
+        href="./BSD_licence.html">modified BSD Licence</a>.
+      </p>
+	  <p>
+		The latest release can be downloaded <a
+        href="https://api.github.com/repos/klueska/tbb-lithe/tarball/release_1_0_0">here.</a>
+      </p>
+	  <p>
+		If you prefer to work directly from the development branch, we also
+		provide read-only access to our shared github repository, with a tag
+        for the current release:
+
+<pre>
+git clone git://github.com/klueska/tbb-lithe.git
+git checkout release_1_0_0</pre>
+      </p>
+	  <p>
+		Once downloaded, you can build TBB-Lithe the same way you build the
+		standard TBB source. 
+      </p>
+	  <p>
+        If you have installed Lithe and Parlib in non-standard locations, you need to
+        set the following environment variables before compiling.
+
+<pre>
+PARLIB_PREFIX=&lt;parlib_install_dir&gt;
+LITHE_PREFIX=&lt;lithe_install_dir&gt;</pre>
+      </p>
+      <p>
+		After doing this, you should be able to just run <code>make</code> to
+		compile TBB.  All of the Lithe changes are wrapped in a "USE_LITHE"
+        #define, which can be enabled or disabled by modifying the THREADING_LIBRARY
+		variable in "build/linux.gcc.inc". Currently we only support TBB-Lithe
+		on linux, using gcc, but future versions may include other operating
+		systems and compilers (including <a
+        href="http://akaros.cs.berkeley.edu">Akaros</a>).
+
+<pre>
+cd tbb-lithe
+make</pre>
+      </p>
+   
+      <section id="testing">
+      <div class="page-header"><h1>Testing</h1></div>
+	  <p> 
+		To test TBB-Lithe, simply run the examples included with the
+		distribution.  All of the examples that use features listed in the <a
+		href="#limitations">limitations</a> section above have been modified to
+        include work-arounds that avoid these limitations.
+<pre>
+cd tbb-lithe
+make examples</pre>
+      </p>
+      <p>
+		All of the examples should run to completion without error.  You can
+		also run <code>make tests</code> to run the TBB regression tests, but
+		there are still a significant number of errors on some of these tests.
+        We hope to have all of these resolved by the next release.
+      </p>
+
+      <section id="contact">
+      <div class="page-header"><h1>Contacting the Authors</h1></div>
+	  <p>
+		Discussions about TBB-Lithe are currently held on the general <a
+		href="http://groups.google.com/group/lithe-users">lithe-users</a>
+        Google group.<br/>
+        Feel free to join the list and post any questions you have there.
+	  </p>
+	  <p>
+        <strong>Current Contributors:</strong>
+        <ul>
+		  <li>Kevin Klues <a href="mailto:klueska@cs.berkeley.edu">
+            &lt;klueska@cs.berkeley.edu&gt; </a></li>
+		  <li>Andrew Waterman <a href="mailto:waterman@cs.berkeley.edu">
+            &lt;waterman@cs.berkeley.edu&gt; </a></li>
+		  <li>Krste Asanović <a href="mailto:krste@cs.berkeley.edu">
+            &lt;krste@cs.berkeley.edu&gt; </a></li>
+        </ul>
+	  </p>
+	  <p>
+        <strong>Past Contributors:</strong>
+        <ul>
+          <li>Heidi Pan <a href="mailto:xoxo@alum.mit.edu"> &lt;xoxo@alum.mit.edu&gt; </a></li>
+          <li>Benjamin Hindman <a href="mailto:benh@cs.berkeley.edu"> &lt;benh@cs.berkeley.edu&gt; </a></li>
+          <li>Rimas Avizienis <a href="mailto:rimas@cs.berkeley.edu"> &lt;rimas@cs.berkeley.edu&gt; </a></li>
+        </ul>
+	  </p>
+
+      <hr>
+
+      <footer>
+      <p>
+        Copyright &copy; 2013 The Regents of the University of California<br/>
+        All Rights Reserved
+      </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./assets/js/jquery.js"></script>
+    <script src="./assets/js/bootstrap-transition.js"></script>
+    <script src="./assets/js/bootstrap-alert.js"></script>
+    <script src="./assets/js/bootstrap-modal.js"></script>
+    <script src="./assets/js/bootstrap-dropdown.js"></script>
+    <script src="./assets/js/bootstrap-scrollspy.js"></script>
+    <script src="./assets/js/bootstrap-tab.js"></script>
+    <script src="./assets/js/bootstrap-tooltip.js"></script>
+    <script src="./assets/js/bootstrap-popover.js"></script>
+    <script src="./assets/js/bootstrap-button.js"></script>
+    <script src="./assets/js/bootstrap-collapse.js"></script>
+    <script src="./assets/js/bootstrap-carousel.js"></script>
+    <script src="./assets/js/bootstrap-typeahead.js"></script>
+
+  </body>
+</html>
