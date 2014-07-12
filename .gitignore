@@ -1,6 +1,5 @@
 tags
-build/linux_intel64_gcc_cc4.5.3_libc2.15_kernel3.2.0_debug/
-build/linux_intel64_gcc_cc4.5.3_libc2.15_kernel3.2.0_release/
+build/linux_intel64_gcc_cc4.*
 examples/GettingStarted/sub_string_finder/sub_string_finder
 examples/GettingStarted/sub_string_finder/sub_string_finder_extended
 examples/GettingStarted/sub_string_finder/sub_string_finder_pretty

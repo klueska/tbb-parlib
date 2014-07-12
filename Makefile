@@ -25,6 +25,7 @@
 # the GNU General Public License.
 
 tbb_root?=.
+PREFIX?=/usr/
 include $(tbb_root)/build/common.inc
 .PHONY: default all tbb tbbmalloc tbbproxy test examples
 
@@ -58,6 +59,11 @@ rml: mkdir
 	$(MAKE) -C "$(work_dir)_debug"  -r -f $(tbb_root)/build/Makefile.rml cfg=debug tbb_root=$(tbb_root)
 	$(MAKE) -C "$(work_dir)_release"  -r -f $(tbb_root)/build/Makefile.rml cfg=release tbb_root=$(tbb_root)
 
+install: default 
+	mkdir -p $(PREFIX)/include/tbb
+	mkdir -p $(PREFIX)/lib
+	cp -R ./include/tbb/* $(PREFIX)/include/tbb
+	cp $(work_dir)_release/*.so* $(PREFIX)/lib/
 
 examples: tbb tbbmalloc
 	$(MAKE) -C examples -r -f Makefile tbb_root=.. release test

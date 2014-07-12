@@ -38,6 +38,10 @@ BUILDING_PHASE:=0
 include ../build/common.inc
 EXCLUDED_EXAMPLES = task_priority/fractal
 
+ifneq ($(PREFIX),)
+    CXXFLAGS += -I$(PREFIX)/include -L$(PREFIX)/lib
+endif
+
 #check, if tbb_root is not absolute path (the filter keeps only /* paths)
 ifeq ($(filter /% $(SLASH)%, $(subst :, ,$(tbb_root)) ),)
     # also changes related variables like work_dir
