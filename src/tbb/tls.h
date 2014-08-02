@@ -57,8 +57,8 @@ public:
     int  create( tls_dtor_t dtor = NULL ) {
         return pthread_key_create(&my_key, dtor);
     }
-    int  destroy()      { return pthread_key_delete(&my_key); }
-    void set( T value ) { pthread_setspecific(&my_key, (void*)value); }
+    int  destroy()      { return pthread_key_delete(my_key); }
+    void set( T value ) { pthread_setspecific(my_key, (void*)value); }
     T    get()          { return (T)pthread_getspecific(my_key); }
 #elif USE_LITHE
     typedef dtls_key_t tls_key_t;
