@@ -123,10 +123,7 @@ void Scheduler::child_exit(lithe_sched_t *child)
 
 void Scheduler::hart_return(lithe_sched_t *child)
 {
-  /* Just call hart_enter() as that is where all of our logic for figuring
-   * out what to do with a newly granted hart is. */
-  assert(child);
-  hart_enter();
+  /* We don't need to do anything for this in this scheduler! */
 }
 
 void Scheduler::hart_enter()
