@@ -398,7 +398,7 @@ private:
 #if _WIN32||_WIN64
     HANDLE thread_handle;
 #elif USE_LITHE
-    tbb::lithe::Context *thread_id;
+    lithe_context_t *thread_id;
 #else
     pthread_t thread_id;
 #endif
@@ -559,8 +559,8 @@ public:
         ASSERT(ms-ms, "Sleep not implemented for lithe!");
     }
 
-    typedef tbb::lithe::Context *tid_t;
-    tid_t CurrentTid () { return (tbb::lithe::Context*)lithe_context_self(); }
+    typedef lithe_context_t *tid_t;
+    tid_t CurrentTid () { return lithe_context_self(); }
 
 #else /* !WIN && !USE_LITHE */
 

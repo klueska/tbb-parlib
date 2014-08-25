@@ -172,9 +172,8 @@ generic_scheduler* governor::init_scheduler( unsigned num_threads, stack_size_ty
     __TBB_ASSERT(s, "Somehow a local scheduler creation for a master thread failed");
     s->my_auto_initialized = auto_init;
 #if USE_LITHE
-    tbb::lithe::Scheduler *lithe_sched = new tbb::lithe::Scheduler();
-    assert(lithe_sched);
-    lithe_sched_enter(lithe_sched);
+    lithe_fork_join_sched_t *lithe_sched = lithe_fork_join_sched_create();
+    lithe_sched_enter(&lithe_sched->sched);
 #endif
     return s;
 }
@@ -184,10 +183,10 @@ void governor::terminate_scheduler( generic_scheduler* s ) {
     if( !--(s->my_ref_count) ) {
         s->cleanup_master();
 #if USE_LITHE
-        tbb::lithe::Scheduler *lithe_sched = (tbb::lithe::Scheduler*)lithe_sched_current();
-        lithe_sched->joinAll();
+        lithe_fork_join_sched_t *lithe_sched = (lithe_fork_join_sched_t*)lithe_sched_current();
+        lithe_fork_join_sched_join_all(lithe_sched);
         lithe_sched_exit();
-        free(lithe_sched);
+        lithe_fork_join_sched_destroy(lithe_sched);
 #endif
     }
 }
@@ -233,7 +232,7 @@ __cilk_tbb_retcode governor::stack_op_handler( __cilk_tbb_stack_op op, void* dat
 #if _WIN32||_WIN64
     uintptr_t thread_id = GetCurrentThreadId();
 #elif USE_LITHE
-    uintptr_t thread_id = uintptr_t((tbb::lithe::Context*)lithe_context_self());
+    uintptr_t thread_id = uintptr_t(lithe_context_self());
 #else
     uintptr_t thread_id = uintptr_t(pthread_self());
 #endif

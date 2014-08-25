@@ -172,9 +172,9 @@ inline void thread_monitor::yield() {
 
 #if USE_LITHE
 inline void thread_monitor::launch( void (*thread_routine)(void*), void* arg, size_t stack_size ) {
-    tbb::lithe::Context *context  = NULL;
-    tbb::lithe::Scheduler *sched = (tbb::lithe::Scheduler*)lithe_sched_current();
-    sched->context_create(&context, stack_size, thread_routine, arg);
+  lithe_fork_join_sched_t *sched =
+    (lithe_fork_join_sched_t*)lithe_sched_current();
+  lithe_fork_join_context_create(sched, stack_size, thread_routine, arg);
 }
 
 inline void thread_monitor::yield() {

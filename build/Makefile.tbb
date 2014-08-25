@@ -88,8 +88,7 @@ TBB_CPLUS.OBJ = concurrent_hash_map.$(OBJ) \
 		scheduler.$(OBJ) \
 		observer_proxy.$(OBJ) \
 		tbb_statistics.$(OBJ) \
-		tbb_main.$(OBJ) \
-		tbb_lithe.$(OBJ)
+		tbb_main.$(OBJ)
 
 # OLD/Legacy object files for backward binary compatibility
 ifeq (,$(findstring $(DEFINE_KEY)TBB_NO_LEGACY,$(CPLUS_FLAGS)))
