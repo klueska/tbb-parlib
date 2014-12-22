@@ -31,13 +31,9 @@
 #endif
 
 #if USE_LITHE
-#include <sched.h>
 #include <lithe/lithe.h>
-#define __TBB_Yield()  \
-{ \
-  if(in_hart_context()) sched_yield(); \
-  else lithe_context_yield(); \
-}
+#include <lithe/futex.h>
+#define __TBB_Yield() cpu_relax() //lithe_context_yield()
 #elif USE_PTHREAD
 #include <sched.h>
 #define __TBB_Yield()  sched_yield()
@@ -74,7 +70,11 @@ namespace tbb {
 namespace internal {
 
 inline int futex_wait( void *futex, int comparand ) {
+#if USE_LITHE
+    int r = ::futex((int*)futex, FUTEX_WAIT, comparand, NULL, NULL, 0);
+#else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAIT,comparand,NULL,NULL,0 );
+#endif
 #if TBB_USE_ASSERT
     int e = errno;
     __TBB_ASSERT( r==0||r==EWOULDBLOCK||(r==-1&&(e==EAGAIN||e==EINTR)), "futex_wait failed." );
@@ -83,13 +83,21 @@ inline int futex_wait( void *futex, int comparand ) {
 }
 
 inline int futex_wakeup_one( void *futex ) {
+#if USE_LITHE
+    int r = ::futex((int*)futex, FUTEX_WAKE, 1, NULL, NULL, 0);
+#else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAKE,1,NULL,NULL,0 );
+#endif
     __TBB_ASSERT( r==0||r==1, "futex_wakeup_one: more than one thread woken up?" );
     return r;
 }
 
 inline int futex_wakeup_all( void *futex ) {
+#if USE_LITHE
+    int r = ::futex((int*)futex, FUTEX_WAKE, INT_MAX, NULL, NULL, 0);
+#else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAKE,INT_MAX,NULL,NULL,0 );
+#endif
     __TBB_ASSERT( r>=0, "futex_wakeup_all: error in waking up threads" );
     return r;
 }

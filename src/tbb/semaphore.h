@@ -40,11 +40,15 @@
 #include <mach/mach_init.h>
 #include <mach/error.h>
 
-#elif USE_LITHE
+#else
+
+#if USE_LITHE
 #include <lithe/mutex.h>
 #include <lithe/semaphore.h>
+#include "tbb/tbb_machine.h"
+#include "tbb/atomic.h"
+#endif
 
-#else
 #include <semaphore.h>
 #ifdef TBB_USE_DEBUG
 #include <errno.h>
@@ -218,31 +222,6 @@ public:
 private:
     semaphore_t my_sem;
 };
-#elif USE_LITHE
-//! binary_semaphore for concurrent monitor
-class binary_semaphore : no_copy {
-public:
-    //! ctor
-    binary_semaphore() {
-        int ret = lithe_mutex_init(&mutex, NULL);
-        __TBB_ASSERT_EX( ret==0, "failed to create a semaphore" );
-    }
-    //! dtor
-    ~binary_semaphore() {}
-    //! wait/acquire
-    void P() { 
-        int ret = lithe_mutex_lock( &mutex );
-        __TBB_ASSERT_EX( ret==0, "lithe_mutex_lock() failed" );
-    }
-    //! post/release 
-    void V() {
-        int ret = lithe_mutex_unlock( &mutex );
-        __TBB_ASSERT_EX( ret==0, "lithe_mutex_unlock() failed" );
-    }
-private:
-    lithe_mutex_t mutex;
-};
-
 #else /* Linux/Unix */
 
 #if __TBB_USE_FUTEX

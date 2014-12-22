@@ -209,7 +209,7 @@ void generic_scheduler::init_stack_info () {
         my_stealing_threshold = (uintptr_t)pteb->StackBase - MByte / 2;
 #elif USE_LITHE
     lithe_context_stack_t stack = lithe_context_self()->stack;
-    my_stealing_threshold = (uintptr_t)stack.bottom + stack_size / 2;
+    my_stealing_threshold = (uintptr_t)stack.bottom + stack.size / 2;
 #else /* USE_PTHREAD */
     // There is no portable way to get stack base address in Posix, so we use
     // non-portable method (on all modern Linux) or the simplified approach

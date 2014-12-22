@@ -107,10 +107,12 @@ static inline void __TBB_machine_and( volatile void *ptr, uint64_t value ) {
 // Definition of other functions
 #ifndef __TBB_Pause
 static inline void __TBB_machine_pause( int32_t delay ) {
+#ifndef USE_LITHE
     for (int32_t i = 0; i < delay; i++) {
        __asm__ __volatile__("pause;");
     }
     return;
+#endif
 }
 #define __TBB_Pause(V) __TBB_machine_pause(V)
 #endif /* !__TBB_Pause */
