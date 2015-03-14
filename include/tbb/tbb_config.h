@@ -42,9 +42,8 @@
 #define __TBB_CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #endif
 
-/** Force build with Lithe support **/
-#ifndef USE_LITHE
-#define USE_LITHE 1
+#ifdef __linux__
+#include "machine/linux_config.h"
 #endif
 
 /** Presence of compiler features **/

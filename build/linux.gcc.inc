@@ -24,8 +24,10 @@
 # invalidate any other reasons why the executable file might be covered by
 # the GNU General Public License.
 
-#THREADING_LIBRARY=PTHREAD
-THREADING_LIBRARY=LITHE
+#THREADING_LIBRARY ?= PTHREAD
+#THREADING_LIBRARY ?= LITHE
+THREADING_LIBRARY ?= UPTHREAD
+UPTHREAD_COMPAT_DIR ?= /usr/include/upthread/compatibility
 
 COMPILE_ONLY = -c -MMD
 PREPROC_ONLY = -E -x c++
@@ -54,6 +56,9 @@ endif
 ifeq ($(THREADING_LIBRARY),LITHE)
   LIBS += -lithe
 endif
+ifeq ($(THREADING_LIBRARY),UPTHREAD)
+  LIBS += -lupthread
+endif
 LIBS += -lrt
 LINK_FLAGS = -Wl,-rpath-link=.
 C_FLAGS = $(CPLUS_FLAGS)
@@ -73,6 +78,9 @@ ifeq ($(cfg), release)
 endif
 ifeq ($(cfg), debug)
         CPLUS_FLAGS = -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_$(THREADING_LIBRARY)
+endif
+ifeq ($(THREADING_LIBRARY),UPTHREAD)
+        CPLUS_FLAGS += -DUSE_PTHREAD -I$(UPTHREAD_COMPAT_DIR)
 endif
 
 ifneq (00,$(lambdas)$(cpp0x))

@@ -33,7 +33,14 @@
 #if USE_LITHE
 #include <lithe/lithe.h>
 #include <lithe/futex.h>
-#define __TBB_Yield() cpu_relax() //lithe_context_yield()
+#define __TBB_Yield() cpu_relax()
+//#define __TBB_Yield() lithe_context_yield()
+#elif USE_UPTHREAD
+#include <sched.h>
+#include <parlib/arch.h>
+#include <upthread/futex.h>
+#define __TBB_Yield() cpu_relax()
+//#define __TBB_Yield()  sched_yield()
 #elif USE_PTHREAD
 #include <sched.h>
 #define __TBB_Yield()  sched_yield()
@@ -42,7 +49,7 @@
 /* Futex definitions */
 #include <sys/syscall.h>
 
-#if defined(SYS_futex)
+#if defined(SYS_futex) || defined(USE_LITHE) || defined(USE_UPTHREAD)
 
 #define __TBB_USE_FUTEX 1
 #include <limits.h>
@@ -70,7 +77,7 @@ namespace tbb {
 namespace internal {
 
 inline int futex_wait( void *futex, int comparand ) {
-#if USE_LITHE
+#if USE_LITHE || USE_UPTHREAD
     int r = ::futex((int*)futex, FUTEX_WAIT, comparand, NULL, NULL, 0);
 #else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAIT,comparand,NULL,NULL,0 );
@@ -83,7 +90,7 @@ inline int futex_wait( void *futex, int comparand ) {
 }
 
 inline int futex_wakeup_one( void *futex ) {
-#if USE_LITHE
+#if USE_LITHE || USE_UPTHREAD
     int r = ::futex((int*)futex, FUTEX_WAKE, 1, NULL, NULL, 0);
 #else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAKE,1,NULL,NULL,0 );
@@ -93,7 +100,7 @@ inline int futex_wakeup_one( void *futex ) {
 }
 
 inline int futex_wakeup_all( void *futex ) {
-#if USE_LITHE
+#if USE_LITHE || USE_UPTHREAD
     int r = ::futex((int*)futex, FUTEX_WAKE, INT_MAX, NULL, NULL, 0);
 #else
     int r = ::syscall( SYS_futex,futex,__TBB_FUTEX_WAKE,INT_MAX,NULL,NULL,0 );
