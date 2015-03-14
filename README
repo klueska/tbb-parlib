@@ -1,25 +1,39 @@
-Threading Building Blocks (lithe port) - README
+Threading Building Blocks (parlib port) - README
 For questions or comments, please contact: 
 Kevin Klues <klueska@cs.berkeley.edu>
 
-This is the lithe port of TBB. It is based on the following tbb release:
+This is the parlib port of TBB. It is based on the following tbb release:
 
 June 28, 2012: Intel® Threading Building Blocks 4.0 Update 5
 tbb40_20120613oss stable release
 http://threadingbuildingblocks.org/ver.php?fid=187
 
-If you have installed lithe and parlib in non-standard locations, you need to
-set the following variables before compiling this library. 
+Currently this port supports schedulers for native pthreads, lithe, and
+upthread. To compile for each, you need to set the environment variable as
+shown below:
+
+export TBB_THREADING_LIB=<pthread, lithe, upthread>
+
+You don't have to export it if you include it on the make command line,
+however, you will need to include it on every make command line if/when you run
+'make examples', so it's easier to just export it into your environment.
+
+If you have installed lithe, upthread, or parlib in non-standard locations, you
+will also need to set the following environment variables before compiling this
+library. 
 
 PARLIB_PREFIX=<parlib_install_dir>
 LITHE_PREFIX=<lithe_install_dir>
+UPTHREAD_PREFIX=<upthread_install_dir>
 
-After doing this, you should be able to just run 'make' to compile tbb, and
-'make examples' to run all of the TBB examples.  Currently some of these
-examples fail -- we are working hard to get this fixed.
+After following these steps, you should be able to run 'make' to compile tbb,
+and 'make examples' to run all of the TBB examples.
+For some reason, the first time running 'make examples' will fail, and you will
+need to run it a second time.  I think it has something to do with parallel
+make targets not having their dependencies setup properly, but I haven't looked
+into this too deeply.
 
-You can also run 'make test' to run the regression tests, but again, some of
-these fail currently, and we are in the process of resolving this.
+Running 'make test' is not currently supported.
 
 ########## Below are the directions from the original TBB README ##############
 Threading Building Blocks - README

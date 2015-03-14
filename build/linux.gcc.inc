@@ -138,6 +138,21 @@ ifeq (sparc,$(arch))
     LIB_LINK_FLAGS += -mcpu=v9 -m64
 endif
 
+ifneq ($(PARLIB_PREFIX),)
+    CPLUS_FLAGS    += -I$(PARLIB_PREFIX)/include
+    LIB_LINK_FLAGS += -L$(PARLIB_PREFIX)/lib
+endif
+
+ifneq ($(LITHE_PREFIX),)
+    CPLUS_FLAGS    += -I$(LITHE_PREFIX)/include
+    LIB_LINK_FLAGS += -L$(LITHE_PREFIX)/lib
+endif
+
+ifneq ($(UPTHREAD_PREFIX),)
+    CPLUS_FLAGS    += -I$(UPTHREAD_PREFIX)/include
+    LIB_LINK_FLAGS += -L$(UPTHREAD_PREFIX)/lib
+endif
+
 #------------------------------------------------------------------------------
 # Setting assembler data.
 #------------------------------------------------------------------------------
