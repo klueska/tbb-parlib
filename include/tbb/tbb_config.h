@@ -43,7 +43,7 @@
 #endif
 
 #ifdef __linux__
-#include "machine/linux_config.h"
+#include "machine/config.h"
 #endif
 
 /** Presence of compiler features **/

@@ -30,15 +30,12 @@ TBB_THREADING_LIB ?= lithe
 UPTHREAD_COMPAT_DIR ?= /usr/include/upthread/compatibility
 
 TBB_THREADING_LIB := $(shell echo $(TBB_THREADING_LIB) | tr a-z A-Z)
-define LINUX_CONFIG_FILE
+define TBB_MACHINE_CONFIG
 #define USE_$(TBB_THREADING_LIB) 1
 #ifdef USE_UPTHREAD
 	#define USE_PTHREAD 1
 #endif
 endef
-export LINUX_CONFIG_FILE
-config:
-	echo "$$LINUX_CONFIG_FILE" > $(tbb_root)/include/tbb/machine/linux_config.h
 
 COMPILE_ONLY = -c -MMD
 PREPROC_ONLY = -E -x c++

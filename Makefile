@@ -31,11 +31,14 @@ include $(tbb_root)/build/common.inc
 
 #workaround for non-depend targets tbb and tbbmalloc which both depend on version_string.ver
 #According to documentation submakes should run in parallel
-.NOTPARALLEL: tbb tbbmalloc tbbproxy
+.NOTPARALLEL: config tbb tbbmalloc tbbproxy
 
 default: config tbb tbbmalloc $(if $(use_proxy),tbbproxy)
 
 all: config tbb tbbmalloc tbbproxy test examples
+
+config:
+	$(MAKE) -r -f build/Makefile.config tbb_root=.
 
 tbb: mkdir
 	$(MAKE) -C "$(work_dir)_debug"  -r -f $(tbb_root)/build/Makefile.tbb cfg=debug tbb_root=$(tbb_root)
