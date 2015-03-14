@@ -24,10 +24,21 @@
 # invalidate any other reasons why the executable file might be covered by
 # the GNU General Public License.
 
-#THREADING_LIBRARY ?= PTHREAD
-#THREADING_LIBRARY ?= LITHE
-THREADING_LIBRARY ?= UPTHREAD
+#TBB_THREADING_LIB ?= pthread
+TBB_THREADING_LIB ?= lithe
+#TBB_THREADING_LIB ?= upthread
 UPTHREAD_COMPAT_DIR ?= /usr/include/upthread/compatibility
+
+TBB_THREADING_LIB := $(shell echo $(TBB_THREADING_LIB) | tr a-z A-Z)
+define LINUX_CONFIG_FILE
+#define USE_$(TBB_THREADING_LIB) 1
+#ifdef USE_UPTHREAD
+	#define USE_PTHREAD 1
+#endif
+endef
+export LINUX_CONFIG_FILE
+config:
+	echo "$$LINUX_CONFIG_FILE" > $(tbb_root)/include/tbb/machine/linux_config.h
 
 COMPILE_ONLY = -c -MMD
 PREPROC_ONLY = -E -x c++
@@ -50,13 +61,13 @@ TBB_NOSTRICT = 1
 CPLUS = g++
 CONLY = gcc
 LIB_LINK_FLAGS = $(DYLIB_KEY) -Wl,-soname=$(BUILDING_LIBRARY)
-ifeq ($(THREADING_LIBRARY),PTHREAD)
+ifeq ($(TBB_THREADING_LIB),PTHREAD)
   LIBS += -lpthread
 endif
-ifeq ($(THREADING_LIBRARY),LITHE)
+ifeq ($(TBB_THREADING_LIB),LITHE)
   LIBS += -lithe
 endif
-ifeq ($(THREADING_LIBRARY),UPTHREAD)
+ifeq ($(TBB_THREADING_LIB),UPTHREAD)
   LIBS += -lupthread
 endif
 LIBS += -lrt
@@ -74,12 +85,12 @@ endif
 
 ITT_NOTIFY = -DDO_ITT_NOTIFY
 ifeq ($(cfg), release)
-        CPLUS_FLAGS = $(ITT_NOTIFY) -g -O2 -DUSE_$(THREADING_LIBRARY)
+        CPLUS_FLAGS = $(ITT_NOTIFY) -g -O2 -DUSE_$(TBB_THREADING_LIB)
 endif
 ifeq ($(cfg), debug)
-        CPLUS_FLAGS = -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_$(THREADING_LIBRARY)
+        CPLUS_FLAGS = -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_$(TBB_THREADING_LIB)
 endif
-ifeq ($(THREADING_LIBRARY),UPTHREAD)
+ifeq ($(TBB_THREADING_LIB),UPTHREAD)
         CPLUS_FLAGS += -DUSE_PTHREAD -I$(UPTHREAD_COMPAT_DIR)
 endif
 

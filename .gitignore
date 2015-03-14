@@ -1,4 +1,5 @@
 tags
+include/tbb/machine/*_config.h
 build/linux_intel64_gcc_cc4.*
 examples/GettingStarted/sub_string_finder/sub_string_finder
 examples/GettingStarted/sub_string_finder/sub_string_finder_extended
