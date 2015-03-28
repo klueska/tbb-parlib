@@ -32,7 +32,7 @@
 #include "tbb/atomic.h"
 
 #if USE_LITHE
-extern "C" int lithe_lib_init(); 
+extern "C" void lithe_lib_init();
 #endif
 
 namespace tbb {

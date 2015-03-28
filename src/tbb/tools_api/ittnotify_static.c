@@ -251,7 +251,11 @@ __itt_global __itt_ittapi_global = {
     0,                                             /* api_initialized */
     0,                                             /* mutex_initialized */
     0,                                             /* atomic_counter */
+#if defined(USE_LITHE) || defined(USE_UPTHREAD)
+    MUTEX_INITIALIZER(__itt_ittapi_global.mutex),  /* mutex */
+#else
     MUTEX_INITIALIZER,                             /* mutex */
+#endif
     NULL,                                          /* dynamic library handle */
     NULL,                                          /* error_handler */
     (const char**)&dll_path,                       /* dll_path_ptr */
